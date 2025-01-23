@@ -1,6 +1,6 @@
 import re
 
-from . import utils
+from . import strutils
 
 
 def convert_html_to_text(html, **kwargs):
@@ -25,12 +25,12 @@ def convert_html_to_text(html, **kwargs):
         node['value'] = wrap_node_value(node['value'], wrap_length, indent_len)
         text += (" " * indent_len) + node['value'] + "\n"
 
-    text = utils.trim_back(text)
+    text = strutils.trim_back(text)
     return text
 
 
 def fill_nodes(html):
-    html = utils.trim(html)
+    html = strutils.trim(html)
     if html[0] != "<":
         return []
 
