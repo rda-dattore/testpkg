@@ -221,7 +221,7 @@ def export_to_datacite(dsid, xml_root, metadb_cursor, wagtaildb_cursor):
                     "            <givenName>" + creator['fname'] + "</givenName>\n"
                     "            <familyName>" + creator['lname'] + "</familyName>\n"
                 )
-                if 'orcid_type' in creator:
+                if 'orcid_id' in creator:
                     dc += "            <nameIdentifier nameIdentifierScheme=\"ORCID\" schemURI=\"https://orcid.org/\">" + creator['orcid_id'] + "</nameIdentifier>\n"
             else:
                 dc += "            <creatorName nameType=\"Organizational\">" + creator['name'] + "</creatorName>\n"
