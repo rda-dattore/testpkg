@@ -226,7 +226,7 @@ def export_to_datacite(dsid, xml_root, metadb_cursor, wagtaildb_cursor):
             else:
                 dc += "            <creatorName nameType=\"Organizational\">" + creator['name'] + "</creatorName>\n"
 
-            dc += "         </creator>\n"
+            dc += "        </creator>\n"
 
         dc += "    </creators>\n"
 
