@@ -3,8 +3,8 @@ import psycopg2
 from libpkg.xmlutils import convert_html_to_text
 from lxml import etree as ElementTree
 
-from dbutils import uncompress_bitmap_values
-from gridutils import spatial_domain_from_grid_definition
+from .dbutils import uncompress_bitmap_values
+from .gridutils import spatial_domain_from_grid_definition
 
 
 def get_date_from_precision(dt, precision, tz):
