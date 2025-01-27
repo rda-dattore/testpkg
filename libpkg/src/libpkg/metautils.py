@@ -248,7 +248,7 @@ def export_to_datacite(dsid, xml_root, metadb_cursor, wagtaildb_cursor):
     dc += (
         "    <contributors>\n"
         "        <contributor contributorType=\"HostingInstitution\">\n"
-        "<contributorName>University Corporation For Atmospheric Research (UCAR):National Center for Atmospheric Research (NCAR):Computational and Information Systems Laboratory (CISL):Information Services Division (ISD):Data Engineering and Curation Section (DECS)</contributorName>\n"
+        "            <contributorName>University Corporation For Atmospheric Research (UCAR):National Center for Atmospheric Research (NCAR):Computational and Information Systems Laboratory (CISL):Information Services Division (ISD):Data Engineering and Curation Section (DECS)</contributorName>\n"
         "        </contributor>\n"
         "    </contributors>\n"
     )
