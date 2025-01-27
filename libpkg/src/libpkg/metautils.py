@@ -64,7 +64,7 @@ def get_pages(pages):
     return {}
 
 
-def export_to_datacite(config, xml_root, metadb_cursor, wagtaildb_cursor):
+def export_to_datacite(dsid, xml_root, metadb_cursor, wagtaildb_cursor):
     resourceTypeGeneral_xml = {
         'book': "Book",
         'book_chapter': "BookChapter",
@@ -104,19 +104,19 @@ def export_to_datacite(config, xml_root, metadb_cursor, wagtaildb_cursor):
 
     geocover = xml_root.find("./contentMetadata/geospatialCoverage")
     try:
-        metadb_cursor.execute("select doi from dssdb.dsvrsn where dsid = %s and status = 'A' and end_date is null", (config['identifier'], ))
+        metadb_cursor.execute("select doi from dssdb.dsvrsn where dsid = %s and status = 'A' and end_date is null", (dsid, ))
         res = metadb_cursor.fetchall()
         if len(res) == 1:
             doi = res[0][0]
 
-        metadb_cursor.execute("select pub_date from search.datasets where dsid = %s", (config['identifier'], ))
+        metadb_cursor.execute("select pub_date from search.datasets where dsid = %s", (dsid, ))
         res = metadb_cursor.fetchall()
         if len(res) != 1:
             raise psycopg2.Error("missing or invalid row count for publication date")
 
         pub_year = str(res[0][0])[0:4]
         if len(creators) == 0:
-            metadb_cursor.execute("select g.path, c.contact from search.contributors_new as c left join search.gcmd_providers as g on g.uuid = c.keyword where c.dsid = %s and c.vocabulary = 'GCMD'", (config['identifier'], ))
+            metadb_cursor.execute("select g.path, c.contact from search.contributors_new as c left join search.gcmd_providers as g on g.uuid = c.keyword where c.dsid = %s and c.vocabulary = 'GCMD'", (dsid, ))
             res = metadb_cursor.fetchall()
             for e in res:
                 parts = e[0].split(" > ")
@@ -131,13 +131,13 @@ def export_to_datacite(config, xml_root, metadb_cursor, wagtaildb_cursor):
                 else:
                     creators.append({'type': "organization", 'name': parts[-1].replace(", ", "/").replace("&", "&amp;")})
 
-        metadb_cursor.execute("select g.path, g.uuid from search.variables as v left join search.gcmd_sciencekeywords as g on g.uuid = v.keyword where v.dsid = %s and v.vocabulary = 'GCMD'", (config['identifier'], ))
+        metadb_cursor.execute("select g.path, g.uuid from search.variables as v left join search.gcmd_sciencekeywords as g on g.uuid = v.keyword where v.dsid = %s and v.vocabulary = 'GCMD'", (dsid, ))
         res = metadb_cursor.fetchall()
         subjs = []
         for e in res:
             subjs.append({'keyword': e[0], 'concept': e[1]})
 
-        metadb_cursor.execute("select min(concat(date_start, ' ', time_start)), min(start_flag), max(concat(date_end, ' ', time_end)), min(end_flag), min(time_zone) from dssdb.dsperiod where dsid = %s and date_start > '0001-01-01' and date_start < '3000-01-01' and date_end > '0001-01-01' and date_end < '3000-01-01'", (config['identifier'], ))
+        metadb_cursor.execute("select min(concat(date_start, ' ', time_start)), min(start_flag), max(concat(date_end, ' ', time_end)), min(end_flag), min(time_zone) from dssdb.dsperiod where dsid = %s and date_start > '0001-01-01' and date_start < '3000-01-01' and date_end > '0001-01-01' and date_end < '3000-01-01'", (dsid, ))
         res = metadb_cursor.fetchone()
         if res is not None:
             tz = res[4]
@@ -150,7 +150,7 @@ def export_to_datacite(config, xml_root, metadb_cursor, wagtaildb_cursor):
                 'end': get_date_from_precision(res[2], res[3], tz),
             }
 
-        metadb_cursor.execute("select c.doi_work, w.type, count(a.last_name) from citation.data_citations as c left join (select distinct doi from dssdb.dsvrsn where dsid = %s) as v on v.doi = c.doi_data left join citation.works_authors as a on a.id = c.doi_work left join citation.works as w on w.doi = c.doi_work where v.doi is not null group by c.doi_work, w.type having count(a.last_name) > 0", (config['identifier'], ))
+        metadb_cursor.execute("select c.doi_work, w.type, count(a.last_name) from citation.data_citations as c left join (select distinct doi from dssdb.dsvrsn where dsid = %s) as v on v.doi = c.doi_data left join citation.works_authors as a on a.id = c.doi_work left join citation.works as w on w.doi = c.doi_work where v.doi is not null group by c.doi_work, w.type having count(a.last_name) > 0", (dsid, ))
         res = metadb_cursor.fetchall()
         rel_ids = []
         for e in res:
@@ -158,10 +158,10 @@ def export_to_datacite(config, xml_root, metadb_cursor, wagtaildb_cursor):
 
         if geocover is None:
             geolocs = []
-            metadb_cursor.execute("select tablename from pg_tables where schemaname = %s and tablename = %s", ("WGrML", config['identifier'] + "_agrids2"))
+            metadb_cursor.execute("select tablename from pg_tables where schemaname = %s and tablename = %s", ("WGrML", dsid + "_agrids2"))
             metadb_cursor.fetchall()
             if metadb_cursor.rowcount > 0:
-                metadb_cursor.execute("select distinct grid_definition_codes from \"WGrML\"." + config['identifier'] + "_agrids2")
+                metadb_cursor.execute("select distinct grid_definition_codes from \"WGrML\"." + dsid + "_agrids2")
                 res = metadb_cursor.fetchall()
                 min_wlon = 999.
                 min_slat = 999.
@@ -188,13 +188,13 @@ def export_to_datacite(config, xml_root, metadb_cursor, wagtaildb_cursor):
                         }
                     })
 
-            metadb_cursor.execute("select g.path from search.locations_new as l left join search.gcmd_locations as g on g.uuid = l.keyword where l.dsid = %s and l.vocabulary = 'GCMD' order by g.path", (config['identifier'], ))
+            metadb_cursor.execute("select g.path from search.locations_new as l left join search.gcmd_locations as g on g.uuid = l.keyword where l.dsid = %s and l.vocabulary = 'GCMD' order by g.path", (dsid, ))
             res = metadb_cursor.fetchall()
             for e in res:
                 geolocs.append({'place': e[0]})
 
-        size = get_primary_size(config['identifier'], metadb_cursor)
-        metadb_cursor.execute("select distinct keyword from search.formats where dsid = %s", (config['identifier'], ))
+        size = get_primary_size(dsid, metadb_cursor)
+        metadb_cursor.execute("select distinct keyword from search.formats where dsid = %s", (dsid, ))
         res = metadb_cursor.fetchall()
         data_formats = [e[0] for e in res]
         license_id = xml_root.find("./dataLicense")
@@ -292,8 +292,8 @@ def export_to_datacite(config, xml_root, metadb_cursor, wagtaildb_cursor):
     dc += (
         "    <language>en-US</language>\n"
         "    <alternateIdentifiers>\n"
-        "        <alternateIdentifier alternateIdentifierType=\"URL\">https://rda.ucar.edu/datasets/" + config['identifier'] + "/</alternateIdentifier>\n"
-        "        <alternateIdentifier alternateIdentifierType=\"Local\">" + config['identifier'] + "</alternateIdentifier>\n"
+        "        <alternateIdentifier alternateIdentifierType=\"URL\">https://rda.ucar.edu/datasets/" + dsid + "/</alternateIdentifier>\n"
+        "        <alternateIdentifier alternateIdentifierType=\"Local\">" + dsid + "</alternateIdentifier>\n"
         "    </alternateIdentifiers>\n"
     )
     rel_items = []
