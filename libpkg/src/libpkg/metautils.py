@@ -1,10 +1,18 @@
-import psycopg2
+import requests
 
 from lxml import etree as ElementTree
 
 from .dbutils import uncompress_bitmap_values
 from .gridutils import spatial_domain_from_grid_definition
 from .xmlutils import convert_html_to_text
+
+
+def open_dataset_overview(dsid):
+    resp = requests.get("https://rda.ucar.edu/datasets/" + dsid + "/metadata/dsOverview.xml")
+    if resp.status_code != 200:
+        raise RuntimeError("unable to download dataset overview: status code: {}".format(resp.status_code))
+
+    return ElementTree.fromstring(resp.text)
 
 
 def get_date_from_precision(dt, precision, tz):
@@ -25,28 +33,24 @@ def get_date_from_precision(dt, precision, tz):
 
 
 def get_primary_size(dsid, cursor):
-    try:
-        cursor.execute("select primary_size from dssdb.dataset where dsid = %s", (dsid, ))
-        res = cursor.fetchone()
-        if res is not None:
-            units = [
-               "bytes",
-               "Kbytes",
-               "Mbytes",
-               "Gbytes",
-               "Tbytes",
-               "Pbytes",
-            ]
-            size = int(res[0])
-            num_div = 0
-            while size > 999.999999:
-                size /= 1000.
-                num_div += 1
+    cursor.execute("select primary_size from dssdb.dataset where dsid = %s", (dsid, ))
+    res = cursor.fetchone()
+    if res is not None:
+        units = [
+           "bytes",
+           "Kbytes",
+           "Mbytes",
+           "Gbytes",
+           "Tbytes",
+           "Pbytes",
+        ]
+        size = int(res[0])
+        num_div = 0
+        while size > 999.999999:
+            size /= 1000.
+            num_div += 1
 
-            return str(round(size, 3)) + " " + units[num_div]
-
-    except psycopg2.Error as err:
-        raise RuntimeError(err)
+        return str(round(size, 3)) + " " + units[num_div]
 
     return None
 
@@ -93,23 +97,20 @@ def get_datacite_4_mandatory_fields(dsid, doi, xml_root, cursor):
                 })
 
     if len(creators) == 0:
-        try:
-            cursor.execute("select g.path, c.contact from search.contributors_new as c left join search.gcmd_providers as g on g.uuid = c.keyword where c.dsid = %s and c.vocabulary = 'GCMD'", (dsid, ))
-            res = cursor.fetchall()
-            for e in res:
-                parts = e[0].split(" > ")
-                if parts[-1] == "UNAFFILIATED INDIVIDUAL":
-                    nparts = e[1].split(",")
-                    lname = (nparts[-1][0].upper() + nparts[1:].lower()).replace(" ", "_")
-                    creators.append({
-                        'type': "personal",
-                        'lname': lname,
-                        'fname': nparts[0],
-                    })
-                else:
-                    creators.append({'type': "organization", 'name': parts[-1].replace(", ", "/").replace("&", "&amp;")})
-        except psycopg2.Error as err:
-            raise RuntimeError(err)
+        cursor.execute("select g.path, c.contact from search.contributors_new as c left join search.gcmd_providers as g on g.uuid = c.keyword where c.dsid = %s and c.vocabulary = 'GCMD'", (dsid, ))
+        res = cursor.fetchall()
+        for e in res:
+            parts = e[0].split(" > ")
+            if parts[-1] == "UNAFFILIATED INDIVIDUAL":
+                nparts = e[1].split(",")
+                lname = (nparts[-1][0].upper() + nparts[1:].lower()).replace(" ", "_")
+                creators.append({
+                    'type': "personal",
+                    'lname': lname,
+                    'fname': nparts[0],
+                })
+            else:
+                creators.append({'type': "organization", 'name': parts[-1].replace(", ", "/").replace("&", "&amp;")})
 
     if len(creators) == 0:
         raise RuntimeError("no creators found and this is a required DataCite field")
@@ -133,16 +134,12 @@ def get_datacite_4_mandatory_fields(dsid, doi, xml_root, cursor):
 
         mand += "    </creators>\n"
 
-    try:
-        cursor.execute("select pub_date from search.datasets where dsid = %s", (dsid, ))
-        res = cursor.fetchall()
-        if len(res) != 1:
-            raise psycopg2.Error("missing or invalid row count for publication date")
+    cursor.execute("select pub_date from search.datasets where dsid = %s", (dsid, ))
+    res = cursor.fetchall()
+    if len(res) != 1:
+        raise RuntimeError("missing or invalid row count for publication date")
 
-        pub_year = str(res[0][0])[0:4]
-    except psycopg2.Error as err:
-        raise RuntimeError(err)
-
+    pub_year = str(res[0][0])[0:4]
     mand += (
         "    <titles>\n"
         "        <title>" + xml_root.find("./title").text + "</title>\n"
@@ -154,7 +151,8 @@ def get_datacite_4_mandatory_fields(dsid, doi, xml_root, cursor):
     return mand
 
 
-def export_to_datacite_4(dsid, xml_root, metadb_cursor, wagtaildb_cursor, **kwargs):
+def export_to_datacite_4(dsid, metadb_cursor, wagtaildb_cursor, **kwargs):
+    xml_root = open_dataset_overview(dsid)
     resourceTypeGeneral_xml = {
         'book': "Book",
         'book_chapter': "BookChapter",
@@ -170,15 +168,11 @@ def export_to_datacite_4(dsid, xml_root, metadb_cursor, wagtaildb_cursor, **kwar
     }
     warnings = []
     dc = "<resource xmlns=\"http://datacite.org/schema/kernel-4\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4.4/metadata.xsd\">\n"
-    try:
-        doi = ""
-        metadb_cursor.execute("select doi from dssdb.dsvrsn where dsid = %s and status = 'A' and end_date is null", (dsid, ))
-        res = metadb_cursor.fetchall()
-        if len(res) == 1:
-            doi = res[0][0]
-
-    except psycopg2.Error as err:
-        raise RuntimeError(err)
+    doi = ""
+    metadb_cursor.execute("select doi from dssdb.dsvrsn where dsid = %s and status = 'A' and end_date is null", (dsid, ))
+    res = metadb_cursor.fetchall()
+    if len(res) == 1:
+        doi = res[0][0]
 
     dc += get_datacite_4_mandatory_fields(dsid, doi, xml_root, metadb_cursor)
     if 'mandatoryOnly' in kwargs and kwargs['mandatoryOnly']:
@@ -186,79 +180,76 @@ def export_to_datacite_4(dsid, xml_root, metadb_cursor, wagtaildb_cursor, **kwar
         return (dc, "\n".join(warnings))
 
     geocover = xml_root.find("./contentMetadata/geospatialCoverage")
-    try:
-        metadb_cursor.execute("select g.path, g.uuid from search.variables as v left join search.gcmd_sciencekeywords as g on g.uuid = v.keyword where v.dsid = %s and v.vocabulary = 'GCMD'", (dsid, ))
-        res = metadb_cursor.fetchall()
-        subjs = []
-        for e in res:
-            subjs.append({'keyword': e[0], 'concept': e[1]})
+    metadb_cursor.execute("select g.path, g.uuid from search.variables as v left join search.gcmd_sciencekeywords as g on g.uuid = v.keyword where v.dsid = %s and v.vocabulary = 'GCMD'", (dsid, ))
+    res = metadb_cursor.fetchall()
+    subjs = []
+    for e in res:
+        subjs.append({'keyword': e[0], 'concept': e[1]})
 
-        metadb_cursor.execute("select min(concat(date_start, ' ', time_start)), min(start_flag), max(concat(date_end, ' ', time_end)), min(end_flag), min(time_zone) from dssdb.dsperiod where dsid = %s and date_start > '0001-01-01' and date_start < '3000-01-01' and date_end > '0001-01-01' and date_end < '3000-01-01'", (dsid, ))
-        res = metadb_cursor.fetchone()
-        if res is not None:
-            tz = res[4]
-            idx = tz.find(",")
-            if idx > 0:
-                tz = tz[0:idx]
+    metadb_cursor.execute("select min(concat(date_start, ' ', time_start)), min(start_flag), max(concat(date_end, ' ', time_end)), min(end_flag), min(time_zone) from dssdb.dsperiod where dsid = %s and date_start > '0001-01-01' and date_start < '3000-01-01' and date_end > '0001-01-01' and date_end < '3000-01-01'", (dsid, ))
+    res = metadb_cursor.fetchone()
+    if res is not None:
+        tz = res[4]
+        idx = tz.find(",")
+        if idx > 0:
+            tz = tz[0:idx]
 
-            dates = {
-                'start': get_date_from_precision(res[0], res[1], tz),
-                'end': get_date_from_precision(res[2], res[3], tz),
-            }
+        dates = {
+            'start': get_date_from_precision(res[0], res[1], tz),
+            'end': get_date_from_precision(res[2], res[3], tz),
+        }
 
-        metadb_cursor.execute("select c.doi_work, w.type, count(a.last_name) from citation.data_citations as c left join (select distinct doi from dssdb.dsvrsn where dsid = %s) as v on v.doi = c.doi_data left join citation.works_authors as a on a.id = c.doi_work left join citation.works as w on w.doi = c.doi_work where v.doi is not null group by c.doi_work, w.type having count(a.last_name) > 0", (dsid, ))
-        res = metadb_cursor.fetchall()
-        rel_ids = []
-        for e in res:
-            rel_ids.append({'doi': e[0], 'type': resourceTypeGeneral_db[e[1]], 'rel': "IsCitedBy"})
+    metadb_cursor.execute("select c.doi_work, w.type, count(a.last_name) from citation.data_citations as c left join (select distinct doi from dssdb.dsvrsn where dsid = %s) as v on v.doi = c.doi_data left join citation.works_authors as a on a.id = c.doi_work left join citation.works as w on w.doi = c.doi_work where v.doi is not null group by c.doi_work, w.type having count(a.last_name) > 0", (dsid, ))
+    res = metadb_cursor.fetchall()
+    rel_ids = []
+    for e in res:
+        rel_ids.append({'doi': e[0], 'type': resourceTypeGeneral_db[e[1]], 'rel': "IsCitedBy"})
 
-        if geocover is None:
-            geolocs = []
-            metadb_cursor.execute("select tablename from pg_tables where schemaname = %s and tablename = %s", ("WGrML", dsid + "_agrids2"))
-            metadb_cursor.fetchall()
-            if metadb_cursor.rowcount > 0:
-                metadb_cursor.execute("select distinct grid_definition_codes from \"WGrML\"." + dsid + "_agrids2")
-                res = metadb_cursor.fetchall()
-                min_wlon = 999.
-                min_slat = 999.
-                max_elon = -999.
-                max_nlat = -999.
-                for e in res:
-                    bvals = uncompress_bitmap_values(e[0])
-                    for val in bvals:
-                        metadb_cursor.execute("select definition, def_params from \"WGrML\".grid_definitions where code = %s", (str(val), ))
-                        gdef = metadb_cursor.fetchone()
-                        wlon, slat, elon, nlat = spatial_domain_from_grid_definition(gdef, centerOn="primeMeridian")
-                        min_wlon = min(wlon, min_wlon)
-                        min_slat = min(slat, min_slat)
-                        max_elon = max(elon, max_elon)
-                        max_nlat = max(nlat, max_nlat)
-
-                if min_wlon < 999.:
-                    geolocs.append({
-                        'box': {
-                            'wlon': str(min_wlon),
-                            'slat': str(min_slat),
-                            'elon': str(max_elon),
-                            'nlat': str(max_nlat),
-                        }
-                    })
-
-            metadb_cursor.execute("select g.path from search.locations_new as l left join search.gcmd_locations as g on g.uuid = l.keyword where l.dsid = %s and l.vocabulary = 'GCMD' order by g.path", (dsid, ))
+    if geocover is None:
+        geolocs = []
+        metadb_cursor.execute("select tablename from pg_tables where schemaname = %s and tablename = %s", ("WGrML", dsid + "_agrids2"))
+        metadb_cursor.fetchall()
+        if metadb_cursor.rowcount > 0:
+            metadb_cursor.execute("select distinct grid_definition_codes from \"WGrML\"." + dsid + "_agrids2")
             res = metadb_cursor.fetchall()
+            min_wlon = 999.
+            min_slat = 999.
+            max_elon = -999.
+            max_nlat = -999.
             for e in res:
-                geolocs.append({'place': e[0]})
+                bvals = uncompress_bitmap_values(e[0])
+                for val in bvals:
+                    metadb_cursor.execute("select definition, def_params from \"WGrML\".grid_definitions where code = %s", (str(val), ))
+                    gdef = metadb_cursor.fetchone()
+                    wlon, slat, elon, nlat = spatial_domain_from_grid_definition(gdef, centerOn="primeMeridian")
+                    min_wlon = min(wlon, min_wlon)
+                    min_slat = min(slat, min_slat)
+                    max_elon = max(elon, max_elon)
+                    max_nlat = max(nlat, max_nlat)
 
-        size = get_primary_size(dsid, metadb_cursor)
-        metadb_cursor.execute("select distinct keyword from search.formats where dsid = %s", (dsid, ))
+            if min_wlon < 999.:
+                geolocs.append({
+                    'box': {
+                        'wlon': str(min_wlon),
+                        'slat': str(min_slat),
+                        'elon': str(max_elon),
+                        'nlat': str(max_nlat),
+                    }
+                })
+
+        metadb_cursor.execute("select g.path from search.locations_new as l left join search.gcmd_locations as g on g.uuid = l.keyword where l.dsid = %s and l.vocabulary = 'GCMD' order by g.path", (dsid, ))
         res = metadb_cursor.fetchall()
-        data_formats = [e[0] for e in res]
-        license_id = xml_root.find("./dataLicense")
-        license_id = "CC-BY-4.0" if license_id is None else license_id.text
-        wagtaildb_cursor.execute("select url, name from wagtail.home_datalicense where id = %s", (license_id, ))
-        rights = (license_id, ) + wagtaildb_cursor.fetchone()
-    except psycopg2.Error as err:
-        raise RuntimeError(err)
+        for e in res:
+            geolocs.append({'place': e[0]})
+
+    size = get_primary_size(dsid, metadb_cursor)
+    metadb_cursor.execute("select distinct keyword from search.formats where dsid = %s", (dsid, ))
+    res = metadb_cursor.fetchall()
+    data_formats = [e[0] for e in res]
+    license_id = xml_root.find("./dataLicense")
+    license_id = "CC-BY-4.0" if license_id is None else license_id.text
+    wagtaildb_cursor.execute("select url, name from wagtail.home_datalicense where id = %s", (license_id, ))
+    rights = (license_id, ) + wagtaildb_cursor.fetchone()
 
     if len(subjs) > 0:
         dc += "    <subjects>\n"
