@@ -64,22 +64,12 @@ def get_pages(pages):
     return {}
 
 
-def export_to_datacite(dsid, xml_root, metadb_cursor, wagtaildb_cursor):
-    resourceTypeGeneral_xml = {
-        'book': "Book",
-        'book_chapter': "BookChapter",
-        'journal:IsDescribedBy': "DataPaper",
-        'journal': "JournalArticle",
-        'preprint': "ConferenceProceeding",
-        'technical_report': "Report",
-    }
-    resourceTypeGeneral_db = {
-        'C': "BookChapter",
-        'J': "JournalArticle",
-        'P': "ConferenceProceeding",
-    }
-    warnings = []
-    dc = "<resource xmlns=\"http://datacite.org/schema/kernel-4\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4.4/metadata.xsd\">\n"
+def get_datacite_4_mandatory_fields(doi, xml_root, cursor):
+    mand = "    <identifier identifierType=\"DOI\">"
+    if len(doi) > 0:
+        mand += doi
+
+    mand += "</identifier>\n"
     creators = []
     lst = xml_root.findall("./author")
     if len(lst) > 0:
@@ -102,22 +92,10 @@ def export_to_datacite(dsid, xml_root, metadb_cursor, wagtaildb_cursor):
                     'name': author.get("name").replace("&", "&amp;")
                 })
 
-    geocover = xml_root.find("./contentMetadata/geospatialCoverage")
-    try:
-        metadb_cursor.execute("select doi from dssdb.dsvrsn where dsid = %s and status = 'A' and end_date is null", (dsid, ))
-        res = metadb_cursor.fetchall()
-        if len(res) == 1:
-            doi = res[0][0]
-
-        metadb_cursor.execute("select pub_date from search.datasets where dsid = %s", (dsid, ))
-        res = metadb_cursor.fetchall()
-        if len(res) != 1:
-            raise psycopg2.Error("missing or invalid row count for publication date")
-
-        pub_year = str(res[0][0])[0:4]
-        if len(creators) == 0:
-            metadb_cursor.execute("select g.path, c.contact from search.contributors_new as c left join search.gcmd_providers as g on g.uuid = c.keyword where c.dsid = %s and c.vocabulary = 'GCMD'", (dsid, ))
-            res = metadb_cursor.fetchall()
+    if len(creators) == 0:
+        try:
+            cursor.execute("select g.path, c.contact from search.contributors_new as c left join search.gcmd_providers as g on g.uuid = c.keyword where c.dsid = %s and c.vocabulary = 'GCMD'", (dsid, ))
+            res = cursor.fetchall()
             for e in res:
                 parts = e[0].split(" > ")
                 if parts[-1] == "UNAFFILIATED INDIVIDUAL":
@@ -130,6 +108,75 @@ def export_to_datacite(dsid, xml_root, metadb_cursor, wagtaildb_cursor):
                     })
                 else:
                     creators.append({'type': "organization", 'name': parts[-1].replace(", ", "/").replace("&", "&amp;")})
+        except psycopg2.Error as err:
+            raise RuntimeError(err)
+
+    if len(creators) == 0:
+        raise RuntimeError("no creators found and this is a required DataCite field")
+
+    if len(creators) > 0:
+        mand += "    <creators>\n"
+        for creator in creators:
+            mand += "        <creator>\n"
+            if creator['type'] == "person":
+                mand += (
+                    "            <creatorName nameType=\"Personal\">" + creator['lname'] + ", " + creator['fname'] + "</creatorName>\n"
+                    "            <givenName>" + creator['fname'] + "</givenName>\n"
+                    "            <familyName>" + creator['lname'] + "</familyName>\n"
+                )
+                if 'orcid_id' in creator:
+                    mand += "            <nameIdentifier nameIdentifierScheme=\"ORCID\" schemURI=\"https://orcid.org/\">" + creator['orcid_id'] + "</nameIdentifier>\n"
+            else:
+                mand += "            <creatorName nameType=\"Organizational\">" + creator['name'] + "</creatorName>\n"
+
+            mand += "        </creator>\n"
+
+        mand += "    </creators>\n"
+
+    try:
+        cursor.execute("select pub_date from search.datasets where dsid = %s", (dsid, ))
+        res = metadb_cursor.fetchall()
+        if len(res) != 1:
+            raise psycopg2.Error("missing or invalid row count for publication date")
+
+        pub_year = str(res[0][0])[0:4]
+    except psycopg2.Error as err:
+        raise RuntimeError(err)
+
+    mand += (
+        "    <titles>\n"
+        "        <title>" + xml_root.find("./title").text + "</title>\n"
+        "    </titles>\n"
+        "    <publisher>UCAR/NCAR - Research Data Archive</publisher>\n"
+        "    <publicationYear>" + pub_year + "</publicationYear>\n"
+        "    <resourceType resourceTypeGeneral=\"Dataset\">" + xml_root.find("./topic[@vocabulary='ISO']").text + "</resourceType>\n"
+    )
+    return mand
+
+
+def export_to_datacite_4(dsid, xml_root, metadb_cursor, wagtaildb_cursor):
+    resourceTypeGeneral_xml = {
+        'book': "Book",
+        'book_chapter': "BookChapter",
+        'journal:IsDescribedBy': "DataPaper",
+        'journal': "JournalArticle",
+        'preprint': "ConferenceProceeding",
+        'technical_report': "Report",
+    }
+    resourceTypeGeneral_db = {
+        'C': "BookChapter",
+        'J': "JournalArticle",
+        'P': "ConferenceProceeding",
+    }
+    warnings = []
+    dc = "<resource xmlns=\"http://datacite.org/schema/kernel-4\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4.4/metadata.xsd\">\n"
+    geocover = xml_root.find("./contentMetadata/geospatialCoverage")
+    try:
+        doi = ""
+        metadb_cursor.execute("select doi from dssdb.dsvrsn where dsid = %s and status = 'A' and end_date is null", (dsid, ))
+        res = metadb_cursor.fetchall()
+        if len(res) == 1:
+            doi = res[0][0]
 
         metadb_cursor.execute("select g.path, g.uuid from search.variables as v left join search.gcmd_sciencekeywords as g on g.uuid = v.keyword where v.dsid = %s and v.vocabulary = 'GCMD'", (dsid, ))
         res = metadb_cursor.fetchall()
@@ -204,40 +251,7 @@ def export_to_datacite(dsid, xml_root, metadb_cursor, wagtaildb_cursor):
     except psycopg2.Error as err:
         raise RuntimeError(err)
 
-    if len(creators) == 0:
-        raise RuntimeError("no creators found and this is a required DataCite field")
-
-    dc += "    <identifier identifierType=\"DOI\">"
-    if 'doi' in locals():
-        dc += doi
-    dc += "</identifier>\n"
-    if len(creators) > 0:
-        dc += "    <creators>\n"
-        for creator in creators:
-            dc += "        <creator>\n"
-            if creator['type'] == "person":
-                dc += (
-                    "            <creatorName nameType=\"Personal\">" + creator['lname'] + ", " + creator['fname'] + "</creatorName>\n"
-                    "            <givenName>" + creator['fname'] + "</givenName>\n"
-                    "            <familyName>" + creator['lname'] + "</familyName>\n"
-                )
-                if 'orcid_id' in creator:
-                    dc += "            <nameIdentifier nameIdentifierScheme=\"ORCID\" schemURI=\"https://orcid.org/\">" + creator['orcid_id'] + "</nameIdentifier>\n"
-            else:
-                dc += "            <creatorName nameType=\"Organizational\">" + creator['name'] + "</creatorName>\n"
-
-            dc += "        </creator>\n"
-
-        dc += "    </creators>\n"
-
-    dc += (
-        "    <titles>\n"
-        "        <title>" + xml_root.find("./title").text + "</title>\n"
-        "    </titles>\n"
-        "    <publisher>UCAR/NCAR - Research Data Archive</publisher>\n"
-        "    <publicationYear>" + pub_year + "</publicationYear>\n"
-        "    <resourceType resourceTypeGeneral=\"Dataset\">" + xml_root.find("./topic[@vocabulary='ISO']").text + "</resourceType>\n"
-    )
+    dc += get_datacite_4_mandatory_fields(doi, xml_root, metadb_cursor)
     if len(subjs) > 0:
         dc += "    <subjects>\n"
         for subj in subjs:
