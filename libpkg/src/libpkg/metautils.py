@@ -181,6 +181,10 @@ def export_to_datacite_4(dsid, xml_root, metadb_cursor, wagtaildb_cursor, **kwar
         raise RuntimeError(err)
 
     dc += get_datacite_4_mandatory_fields(dsid, doi, xml_root, metadb_cursor)
+    if 'mandatoryOnly' in kwargs and kwargs['mandatoryOnly']:
+        dc += "</resource>"
+        return dc
+
     geocover = xml_root.find("./contentMetadata/geospatialCoverage")
     try:
         metadb_cursor.execute("select g.path, g.uuid from search.variables as v left join search.gcmd_sciencekeywords as g on g.uuid = v.keyword where v.dsid = %s and v.vocabulary = 'GCMD'", (dsid, ))
