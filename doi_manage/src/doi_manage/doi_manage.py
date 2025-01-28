@@ -7,7 +7,7 @@ import sys
 import time
 
 try:
-    import local_settings as settings
+    from . import local_settings as settings
 except:
     pass
 
@@ -344,13 +344,10 @@ def main():
     if mode == "configure":
         configure(auth_key, config)
     else:
-        print("A")
         try:
             if "-t" in args:
-                print("B")
                 config.update({'api_config': settings.test_api_config})
             else:
-                print("C " + str(settings))
                 config.update({'api_config': settings.operations_api_config})
 
         except Exception:
