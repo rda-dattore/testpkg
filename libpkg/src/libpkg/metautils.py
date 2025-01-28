@@ -154,7 +154,7 @@ def get_datacite_4_mandatory_fields(dsid, doi, xml_root, cursor):
     return mand
 
 
-def export_to_datacite_4(dsid, xml_root, metadb_cursor, wagtaildb_cursor):
+def export_to_datacite_4(dsid, xml_root, metadb_cursor, wagtaildb_cursor, **kwargs):
     resourceTypeGeneral_xml = {
         'book': "Book",
         'book_chapter': "BookChapter",
