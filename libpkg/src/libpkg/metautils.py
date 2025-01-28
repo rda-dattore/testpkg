@@ -15,7 +15,7 @@ def get_date_from_precision(dt, precision, tz):
         while len(tparts) > precision:
             del tparts[-1]
 
-        return parts[0] + "T" + ":".join(tparts) + tz
+        return parts[0] + "T" + ":".join(tparts) + tz[0:3] + ":" + tz[3:]
     else:
         dparts = parts[0].split("-")
         while len(dparts) > precision:
