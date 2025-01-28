@@ -284,7 +284,7 @@ def export_to_datacite_4(dsid, metadb_cursor, wagtaildb_cursor, **kwargs):
         for e in lst:
             pass
 
-    if len(geolocs) > 0:
+    if 'geolocs' in locals() and len(geolocs) > 0:
         dc += "    <geoLocations>\n"
         for loc in geolocs:
             dc += "        <geoLocation>\n"
