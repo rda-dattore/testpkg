@@ -305,7 +305,7 @@ def update_doi(config, **kwargs):
     return warn
 
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv[1:]) < 3:
         print((
             "usage: {} <authorization_key> [options...] <mode> <identifier>".format(sys.argv[0][sys.argv[0].rfind("/")+1:]) + "\n"
@@ -368,3 +368,7 @@ if __name__ == "__main__":
             print(out)
 
     sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()
