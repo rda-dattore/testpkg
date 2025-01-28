@@ -1,6 +1,7 @@
 import json
 import os
 import psycopg2
+import site
 import subprocess
 import sys
 import time
@@ -31,6 +32,10 @@ sys.excepthook = on_crash
 
 
 def configure(auth_key, config):
+    pkg_dirs = site.getsitepackages()
+    if len(pkg_dirs) == 0:
+        raise FileNotFoundError("unable to locate site-packages directory")
+
     with open(config['identifier'], "r") as f:
         lines = f.read().splitlines()
 
@@ -108,7 +113,7 @@ def configure(auth_key, config):
             elif parts[0] == "error_notification":
                 notifications['error'].append(parts[1])
 
-    with open("local_settings.py", "w") as f:
+    with open(os.path.join(pkg_dirs[0], "local_settings.py"), "w") as f:
         f.write("authorization_key = \"" + auth_key + "\"\n")
         f.write("\ntest_api_config = " + json.dumps(test_api_config, indent=4) + "\n")
         f.write("\noperations_api_config = " + json.dumps(operations_api_config, indent=4) + "\n")
