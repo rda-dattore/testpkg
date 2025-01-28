@@ -170,6 +170,7 @@ def export_to_datacite_4(dsid, xml_root, metadb_cursor, wagtaildb_cursor, **kwar
     }
     warnings = []
     dc = "<resource xmlns=\"http://datacite.org/schema/kernel-4\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4.4/metadata.xsd\">\n"
+    dc += get_datacite_4_mandatory_fields(dsid, doi, xml_root, metadb_cursor)
     geocover = xml_root.find("./contentMetadata/geospatialCoverage")
     try:
         doi = ""
@@ -251,7 +252,6 @@ def export_to_datacite_4(dsid, xml_root, metadb_cursor, wagtaildb_cursor, **kwar
     except psycopg2.Error as err:
         raise RuntimeError(err)
 
-    dc += get_datacite_4_mandatory_fields(dsid, doi, xml_root, metadb_cursor)
     if len(subjs) > 0:
         dc += "    <subjects>\n"
         for subj in subjs:
@@ -425,5 +425,4 @@ def export_to_datacite_4(dsid, xml_root, metadb_cursor, wagtaildb_cursor, **kwar
         "    </rightsList>\n"
     )
     dc += "</resource>"
-    #print(dc)
     return (dc, "\n".join(warnings))
