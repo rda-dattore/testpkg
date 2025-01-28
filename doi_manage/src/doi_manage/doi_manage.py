@@ -344,10 +344,13 @@ def main():
     if mode == "configure":
         configure(auth_key, config)
     else:
+        print("A")
         try:
             if "-t" in args:
+                print("B")
                 config.update({'api_config': settings.test_api_config})
             else:
+                print("C")
                 config.update({'api_config': settings.operations_api_config})
 
         except Exception:
