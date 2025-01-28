@@ -170,8 +170,6 @@ def export_to_datacite_4(dsid, xml_root, metadb_cursor, wagtaildb_cursor, **kwar
     }
     warnings = []
     dc = "<resource xmlns=\"http://datacite.org/schema/kernel-4\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4.4/metadata.xsd\">\n"
-    dc += get_datacite_4_mandatory_fields(dsid, doi, xml_root, metadb_cursor)
-    geocover = xml_root.find("./contentMetadata/geospatialCoverage")
     try:
         doi = ""
         metadb_cursor.execute("select doi from dssdb.dsvrsn where dsid = %s and status = 'A' and end_date is null", (dsid, ))
@@ -179,6 +177,12 @@ def export_to_datacite_4(dsid, xml_root, metadb_cursor, wagtaildb_cursor, **kwar
         if len(res) == 1:
             doi = res[0][0]
 
+    except psycopg2.Error as err:
+        raise RuntimeError(err)
+
+    dc += get_datacite_4_mandatory_fields(dsid, doi, xml_root, metadb_cursor)
+    geocover = xml_root.find("./contentMetadata/geospatialCoverage")
+    try:
         metadb_cursor.execute("select g.path, g.uuid from search.variables as v left join search.gcmd_sciencekeywords as g on g.uuid = v.keyword where v.dsid = %s and v.vocabulary = 'GCMD'", (dsid, ))
         res = metadb_cursor.fetchall()
         subjs = []
