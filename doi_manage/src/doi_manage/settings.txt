@@ -1,0 +1,22 @@
+test_api_username = <datacite_test_username>
+test_api_password = <datacite_test_password>
+test_api_host = <datacite_test_api_url>
+test_api_doi_prefix = <datacite_test_doi_prefix>
+operations_api_username = <datacite_operations_username>
+operations_api_password = <datacite_operations_password>
+operations_api_host = <datacite_operations_api_url>
+operations_api_doi_prefix = <datacite_operations_doi_prefix>
+# managed prefix can be repeated for multiple prefixes
+managed_prefix = <prefix>
+metadata_database_username = <metadata_database_username>
+metadata_database_password = <metadata_database_password>
+metadata_database_host = <metadata_database_host>
+metadata_database_dbname = <metadata_database_dbname>
+wagtail_database_username = <wagtail_database_username>
+wagtail_database_password = <wagtail_database_password>
+wagtail_database_host = <wagtail_database_host>
+wagtail_database_dbname = <wagtail_database_dbname>
+# info notification can be repeated for multiple email addresses
+info_notification = <email_address>
+# error notification can be repeated for multiple email addresses
+error_notification = <email_address>
