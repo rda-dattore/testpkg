@@ -183,7 +183,7 @@ def export_to_datacite_4(dsid, xml_root, metadb_cursor, wagtaildb_cursor, **kwar
     dc += get_datacite_4_mandatory_fields(dsid, doi, xml_root, metadb_cursor)
     if 'mandatoryOnly' in kwargs and kwargs['mandatoryOnly']:
         dc += "</resource>"
-        return dc
+        return (dc, "\n".join(warnings))
 
     geocover = xml_root.find("./contentMetadata/geospatialCoverage")
     try:
