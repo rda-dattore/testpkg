@@ -19,3 +19,6 @@ classifiers = [
 
 [project.scripts]
 doi_manage = "doi_manage.doi_manage:main"
+
+[tool.setuptools.package-data]
+doi_manage = ["local_settings.py"]
