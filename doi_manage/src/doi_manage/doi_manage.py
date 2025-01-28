@@ -6,10 +6,7 @@ import subprocess
 import sys
 import time
 
-try:
-    from . import local_settings as settings
-except:
-    pass
+from . import local_settings as settings
 
 from lxml import etree as ElementTree
 
