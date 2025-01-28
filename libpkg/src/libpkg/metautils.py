@@ -255,7 +255,7 @@ def export_to_datacite(dsid, xml_root, metadb_cursor, wagtaildb_cursor):
     if 'dates' in locals():
         dc += (
             "    <dates>\n"
-            "        <date dateType=\"Valid\">" + dates['start'] + " to " + dates['end'] + "</date>\n"
+            "        <date dateType=\"Valid\">" + dates['start'] + "/" + dates['end'] + "</date>\n"
             "    </dates>\n"
         )
 
