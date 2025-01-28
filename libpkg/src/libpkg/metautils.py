@@ -135,7 +135,7 @@ def get_datacite_4_mandatory_fields(dsid, doi, xml_root, cursor):
 
     try:
         cursor.execute("select pub_date from search.datasets where dsid = %s", (dsid, ))
-        res = metadb_cursor.fetchall()
+        res = cursor.fetchall()
         if len(res) != 1:
             raise psycopg2.Error("missing or invalid row count for publication date")
 
