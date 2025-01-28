@@ -64,7 +64,7 @@ def get_pages(pages):
     return {}
 
 
-def get_datacite_4_mandatory_fields(doi, xml_root, cursor):
+def get_datacite_4_mandatory_fields(dsid, doi, xml_root, cursor):
     mand = "    <identifier identifierType=\"DOI\">"
     if len(doi) > 0:
         mand += doi
@@ -251,7 +251,7 @@ def export_to_datacite_4(dsid, xml_root, metadb_cursor, wagtaildb_cursor):
     except psycopg2.Error as err:
         raise RuntimeError(err)
 
-    dc += get_datacite_4_mandatory_fields(doi, xml_root, metadb_cursor)
+    dc += get_datacite_4_mandatory_fields(dsid, doi, xml_root, metadb_cursor)
     if len(subjs) > 0:
         dc += "    <subjects>\n"
         for subj in subjs:
