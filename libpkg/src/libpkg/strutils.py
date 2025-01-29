@@ -157,28 +157,3 @@ def to_title(s):
                 words[x] = words[x][0:1].upper() + words[x][1:]
 
     return " ".join(words)
-
-
-def trim(text):
-    if len(text) == 0:
-        return ""
-
-    text = trim_front(text)
-    text = trim_back(text)
-    return text
-
-
-def trim_front(text):
-    n = 0
-    while n < len(text) and text[n] in (' ', '\t', '\n', '\r'):
-        n += 1
-
-    return text[n:]
-
-
-def trim_back(text):
-    n = len(text) - 1
-    while n >= 0 and text[n] in (' ', '\t', '\n', '\r'):
-        n -= 1
-
-    return text[0:n+1]
