@@ -16,7 +16,5 @@ wagtail_database_username = <wagtail_database_username>
 wagtail_database_password = <wagtail_database_password>
 wagtail_database_host = <wagtail_database_host>
 wagtail_database_dbname = <wagtail_database_dbname>
-# info notification can be repeated for multiple email addresses
-info_notification = <email_address>
 # error notification can be repeated for multiple email addresses
 error_notification = <email_address>
