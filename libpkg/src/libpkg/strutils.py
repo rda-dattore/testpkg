@@ -78,10 +78,9 @@ def cleaned_search_word(word):
         cleaned_word = cleaned_word[idx+1:]
 
     # strip punctuation
-    t = strip_punctuation(cleaned_word)
-    while t[0]:
-        cleaned_word = t[1]
-        t = strip_punctuation(cleaned_word)
+    stripped, cleaned_word = strip_punctuation(cleaned_word)
+    while stripped:
+        stripped, cleaned_word = strip_punctuation(cleaned_word)
 
     if len(cleaned_word) > 1 and cleaned_word[-2:] == "'s":
         cleaned_word = cleaned_word[0:-2]
@@ -123,6 +122,17 @@ def root_of_word(word):
         word = word[:-1]
 
     return word
+
+
+def strip_plural(text):
+    text = text.replace(u"\u2019", "'")
+    if text[-2:] == "'s":
+        return text[:-2]
+
+    if text[-1:] == "s":
+        return text[:-1]
+
+    return text
 
 
 def strip_punctuation(word):
