@@ -415,7 +415,7 @@ def export_to_datacite_4(dsid, metadb_config, wagtaildb_config, **kwargs):
                 dc += "        <relatedIdentifier relatedIdentifierType=\"DOI\" relationType=\"" + rel + "\">" + e.text + "</relatedIdentifier>\n"
     
             for e in rel_ids:
-                dc += "        <relatedIdentifier relatedIdentifierType=\"DOI\" relationType=\"" + e['rel'] + "\" resourceTypeGeneral=\"" + e['type'] + "\">" + e['doi'] + "</relatedIdentifier>\n"
+                dc += "        <relatedIdentifier relatedIdentifierType=\"DOI\" relationType=\"" + e['rel'] + "\" resourceTypeGeneral=\"" + e['type'] + "\">" + e['doi'].replace("<", "&lt;").replace(">", "&gt;") + "</relatedIdentifier>\n"
     
             dc += "    </relatedIdentifiers>\n"
     
