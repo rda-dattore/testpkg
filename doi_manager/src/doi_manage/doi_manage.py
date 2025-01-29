@@ -65,7 +65,6 @@ def configure(auth_key, config):
         'dbname': "",
     }
     notifications = {
-        'info': [],
         'error': [],
     }
     for line in lines:
