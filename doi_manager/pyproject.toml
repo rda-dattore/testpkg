@@ -12,7 +12,7 @@ description = ""
 readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
-    "git+https://github.com/rda-dattore/testpkg#subdirectory=libpkg",
+    "libpkg @ git+https://github.com/rda-dattore/testpkg#subdirectory=libpkg",
 ]
 license = {file = "LICENSE"}
 classifiers = [
