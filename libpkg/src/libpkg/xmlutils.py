@@ -25,12 +25,11 @@ def convert_html_to_text(html, **kwargs):
         node['value'] = wrap_node_value(node['value'], wrap_length, indent_len)
         text += (" " * indent_len) + node['value'] + "\n"
 
-    text = strutils.trim_back(text)
-    return text
+    return text.strip()
 
 
 def fill_nodes(html):
-    html = strutils.trim(html)
+    html = html.strip()
     if html[0] != "<":
         return []
 

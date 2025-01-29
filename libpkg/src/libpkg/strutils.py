@@ -50,7 +50,7 @@ def strand(n):
 
 
 def cleaned_search_word(word):
-    cleaned_word = trim(word).lower()
+    cleaned_word = word.strip().lower()
 
     # ignore dataset IDs
     if re.compile("^d\d{6}$").match(cleaned_word):
