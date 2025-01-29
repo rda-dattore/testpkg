@@ -1,6 +1,6 @@
 # doi_manager
 
-This tool mints (creates) a DOI and manages the metadata and registered URL associated with the DOI.
+This tool mints (creates) a DOI for an NG-GDEX dataset and manages the metadata and registered URL associated with the DOI.
 
 ## Installation
 
