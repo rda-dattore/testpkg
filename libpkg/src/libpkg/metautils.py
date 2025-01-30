@@ -328,6 +328,7 @@ def export_to_datacite_4(dsid, metadb_config, wagtaildb_config, **kwargs):
         lst = xml_root.findall("./reference")
         for e in lst:
             rel = e.get("ds_relation")
+            # REMOVE THE NEXT TWO LINES AFTER TESTING!
             if rel is None:
                 rel = "IsReviewedBy"
             if rel is None:
@@ -336,7 +337,11 @@ def export_to_datacite_4(dsid, metadb_config, wagtaildb_config, **kwargs):
                 doi = e.find("./doi")
                 type = e.get("type")
                 if doi is None:
-                    rel_items.append({'type': resourceTypeGeneral_xml[type], 'rel': rel, 'url': e.find("./url").text, 'title': e.find("./title").text, 'pub_year': e.find("./year").text})
+                    rel_items.append({'type': resourceTypeGeneral_xml[type], 'rel': rel, 'title': e.find("./title").text, 'pub_year': e.find("./year").text})
+                    url = e.find("./url")
+                    if url is not None:
+                        rel_items[-1]['url'] = url.text
+
                     if type == "book":
                         p = e.find("./publisher")
                         rel_items[-1]['publisher'] = p.text + ", " + p.get("place")
