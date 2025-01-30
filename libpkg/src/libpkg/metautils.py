@@ -382,9 +382,11 @@ def export_to_datacite_4(dsid, metadb_config, wagtaildb_config, **kwargs):
         if len(rel_items) > 0:
             dc += "    <relatedItems>\n"
             for e in rel_items:
+                dc += "        <relatedItem relatedItemType=\"" + e['type'] + "\" relationType=\"" + e['rel'] + "\">\n"
+                if 'url' in e:
+                    dc += "            <relatedItemIdentifier relatedItemIdentifierType=\"URL\">" + e['url'] + "</relatedItemIdentifier>\n"
+
                 dc += (
-                    "        <relatedItem relatedItemType=\"" + e['type'] + "\" relationType=\"" + e['rel'] + "\">\n"
-                    "            <relatedItemIdentifier relatedItemIdentifierType=\"URL\">" + e['url'] + "</relatedItemIdentifier>\n"
                     "            <titles>\n"
                     "                <title>" + e['title'] + "</title>\n"
                     "            </titles>\n"
