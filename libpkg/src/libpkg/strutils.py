@@ -167,3 +167,11 @@ def to_title(s):
                 words[x] = words[x][0:1].upper() + words[x][1:]
 
     return " ".join(words)
+
+
+def snake_to_capital(s):
+    sp = s.split("_")
+    if len(sp) == 1:
+        sp = s.split()
+
+    return " ".join([e[0:1].upper() + e[1:] for e in sp])
