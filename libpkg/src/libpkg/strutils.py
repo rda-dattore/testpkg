@@ -9,33 +9,32 @@ def soundex(word):
 
     head = word[0:1].upper()
     tail = (word[1:].upper()
-        .replace("A", "")
-        .replace("E", "")
-        .replace("I", "")
-        .replace("O", "")
-        .replace("U", "")
-        .replace("H", "")
-        .replace("W", "")
-        .replace("Y", "")
-        .replace("B", "1")
-        .replace("F", "1")
-        .replace("P", "1")
-        .replace("V", "1")
-        .replace("C", "2")
-        .replace("G", "2")
-        .replace("J", "2")
-        .replace("K", "2")
-        .replace("Q", "2")
-        .replace("S", "2")
-        .replace("X", "2")
-        .replace("Z", "2")
-        .replace("D", "3")
-        .replace("T", "3")
-        .replace("L", "4")
-        .replace("M", "5")
-        .replace("N", "5")
-        .replace("R", "6")
-    )
+            .replace("A", "")
+            .replace("E", "")
+            .replace("I", "")
+            .replace("O", "")
+            .replace("U", "")
+            .replace("H", "")
+            .replace("W", "")
+            .replace("Y", "")
+            .replace("B", "1")
+            .replace("F", "1")
+            .replace("P", "1")
+            .replace("V", "1")
+            .replace("C", "2")
+            .replace("G", "2")
+            .replace("J", "2")
+            .replace("K", "2")
+            .replace("Q", "2")
+            .replace("S", "2")
+            .replace("X", "2")
+            .replace("Z", "2")
+            .replace("D", "3")
+            .replace("T", "3")
+            .replace("L", "4")
+            .replace("M", "5")
+            .replace("N", "5")
+            .replace("R", "6"))
     tail = list(tail)
     for x in reversed(range(1, len(tail))):
         if tail[x] == tail[x-1]:
@@ -118,7 +117,8 @@ def root_of_word(word):
     if len(word) > 2 and word[-3:] == "ous":
         word = word[:-3]
 
-    while len(word) > 1 and (word[-1] == word[-2] or word[-1] in string.digits):
+    while (len(word) > 1 and (word[-1] == word[-2] or word[-1] in
+           string.digits)):
         word = word[:-1]
 
     return word
@@ -141,7 +141,8 @@ def strip_punctuation(word):
         word = word[1:]
         stripped = True
 
-    while len(word) > 0 and word[-1] in (',', ':', '\'', '"', '\\', '.', '!'):
+    while (len(word) > 0 and word[-1] in
+            (',', ';', ':', '\'', '"', '\\', '.', '!')):
         word = word[:-1]
         stripped = True
 
@@ -154,10 +155,9 @@ def strip_punctuation(word):
 
 def to_title(s):
     if not hasattr(to_title, "uncapitalized_words"):
-        to_title.uncapitalized_words = ("a", "an", "and", "as", "at", "but",
-            "by", "for", "from", "in", "is","nor", "of", "on", "or", "the",
-            "to", "up",
-        )
+        to_title.uncapitalized_words = (
+                "a", "an", "and", "as", "at", "but", "by", "for", "from", "in",
+                "is", "nor", "of", "on", "or", "the", "to", "up")
 
     if len(s) > 0:
         words = s.split()
