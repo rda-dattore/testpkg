@@ -150,10 +150,11 @@ def get_datacite_4_mandatory_fields(dsid, xml_root, cursor):
 
 
 def to_json(dc_data):
-    return json.dumps(dc_data, indent=2)
+    return (json.dumps(dc_data, indent=2), "")
 
 
 def to_xml(dc_data, **kwargs):
+    warnings = []
     nsmap = {
         None: "http://datacite.org/schema/kernel-4",
         "xsi": "http://www.w3.org/2001/XMLSchema-instance"
@@ -161,11 +162,11 @@ def to_xml(dc_data, **kwargs):
     attr_qname = etree.QName(
             "http://www.w3.org/2001/XMLSchema-instance",
             "schemaLocation")
+    xsd = "http://schema.datacite.org/meta/kernel-4.4/metadata.xsd"
     root = etree.Element(
             "resource",
             {attr_qname: (
-                "http://datacite.org/schema/kernel-4 "
-                "http://schema.datacite.org/meta/kernel-4.4/metadata.xsd")},
+                "http://datacite.org/schema/kernel-4 " + xsd)},
             nsmap=nsmap)
     if 'doi' in dc_data:
         etree.SubElement(root, "identifier", identifierType="DOI").text = (
@@ -313,7 +314,15 @@ def to_xml(dc_data, **kwargs):
             etree.SubElement(root, "rightsList"),
             "rights", rightsIdentifier=rights['rightsIdentifier'],
             rightsURI=rights['rightsUri']).text = rights['rights']
-    return etree.tostring(root, pretty_print=True).decode("utf-8")
+    xml_schema = etree.XMLSchema(etree.parse(xsd))
+    root = etree.fromstring(etree.tostring(root))
+    try:
+        xml_schema.assertValid(root)
+    except Exception as err:
+        warnings.append("XML validation failed: '" + str(err) + "'")
+
+    return (etree.tostring(root, pretty_print=True).decode("utf-8"),
+            "\n".join(warnings))
 
 
 def to_output(dc_data, ofmt, **kwargs):
@@ -373,7 +382,11 @@ def export_to_datacite_4(dsid, metadb_config, wagtaildb_config, **kwargs):
         dc_data.update(get_datacite_4_mandatory_fields(dsid, xml_root,
                                                        metadb_cursor))
         if 'mandatoryOnly' in kwargs and kwargs['mandatoryOnly']:
-            return (to_output(dc_data, ofmt, kwargs), "\n".join(warnings))
+            o, warn = to_output(dc_data, ofmt, kwargs)
+            if len(warn) > 0:
+                warnings.append(warn)
+
+            return (o, "\n".join(warnings))
 
         geocover = xml_root.find("./contentMetadata/geospatialCoverage")
         metadb_cursor.execute((
@@ -592,6 +605,10 @@ def export_to_datacite_4(dsid, metadb_config, wagtaildb_config, **kwargs):
                         'resourceTypeGeneral': resourceTypeGeneral_xml[type],
                         'relatedIdentifierType': "DOI"})
 
-        return (to_output(dc_data, ofmt), "\n".join(warnings))
+        o, warn = to_output(dc_data, ofmt)
+        if len(warn) > 0:
+            warnings.append(warn)
+
+        return (o, "\n".join(warnings))
     finally:
         metadb_conn.close()
