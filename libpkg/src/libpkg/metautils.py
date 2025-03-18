@@ -260,7 +260,7 @@ def to_xml(dc_data, **kwargs):
                 alternateIdentifierType=alt_id['identifierType']).text = (
             alt_id['identifier'])
 
-    if len(dc_data['relatedItems']) > 0:
+    if 'relatedItems' in dc_data:
         rel_items = etree.SubElement(root, "relatedItems")
         for rel_item in dc_data['relatedItems']:
             e = etree.SubElement(
@@ -604,6 +604,9 @@ def export_to_datacite_4(dsid, metadb_config, wagtaildb_config, **kwargs):
                         'relatedIdentifier': doi.text,
                         'resourceTypeGeneral': resourceTypeGeneral_xml[type],
                         'relatedIdentifierType': "DOI"})
+
+        if len(dc_data['relatedItems']) == 0:
+            del dc_data['relatedItems']
 
         o, warn = to_output(dc_data, ofmt)
         if len(warn) > 0:
