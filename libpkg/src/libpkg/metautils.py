@@ -6,7 +6,7 @@ from lxml import etree
 
 from .dbutils import uncompress_bitmap_values
 from .gridutils import spatial_domain_from_grid_definition
-from .strutils import snake_to_capital
+from strutils import snake_to_capital
 from .xmlutils import convert_html_to_text
 
 
@@ -307,7 +307,7 @@ def to_xml(dc_data, **kwargs):
     if len(dc_data['formats']) > 0:
         fmts = etree.SubElement(root, "formats")
         for fmt in dc_data['formats']:
-            etree.SubElement(fmts, "format").text = snake_to_capital(fmt)
+            etree.SubElement(fmts, "format").text = fmt
 
     rights = dc_data['rightsList'][0]
     etree.SubElement(
@@ -502,7 +502,7 @@ def export_to_datacite_4(dsid, metadb_config, wagtaildb_config, **kwargs):
                 "select distinct keyword from search.formats where dsid = %s"),
                 (dsid, ))
         res = metadb_cursor.fetchall()
-        dc_data['formats'] = [e[0] for e in res]
+        dc_data['formats'] = [snake_to_capital(e[0]) for e in res]
         license_id = xml_root.find("./dataLicense")
         license_id = "CC-BY-4.0" if license_id is None else license_id.text
         try:
