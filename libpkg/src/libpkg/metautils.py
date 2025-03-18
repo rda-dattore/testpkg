@@ -6,7 +6,7 @@ from lxml import etree
 
 from .dbutils import uncompress_bitmap_values
 from .gridutils import spatial_domain_from_grid_definition
-from strutils import snake_to_capital
+from .strutils import snake_to_capital
 from .xmlutils import convert_html_to_text
 
 
