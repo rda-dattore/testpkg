@@ -3,6 +3,7 @@ import psycopg2
 
 from lxml import etree
 
+from . import settings
 from ..dbutils import uncompress_bitmap_values
 from ..gridutils import spatial_domain_from_grid_definition
 from ..metautils import (get_dataset_size,
@@ -22,7 +23,7 @@ def get_mandatory_fields(dsid, xml_root, cursor):
                 'resourceType':
                     xml_root.find("./topic[@vocabulary='ISO']").text
             },
-            'publisher': "UCAR/NCAR - Research Data Archive"}
+            'publisher': settings.PUBLISHER}
     mand['creators'] = []
     lst = xml_root.findall("./author")
     if len(lst) > 0:
@@ -273,9 +274,9 @@ def to_output(dc_data, ofmt, **kwargs):
         return to_xml(dc_data, **kwargs)
 
 
-def export(dsid, metadb_config, wagtaildb_config, **kwargs):
+def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
     try:
-        metadb_conn = psycopg2.connect(**metadb_config)
+        metadb_conn = psycopg2.connect(**metadb_settings)
         metadb_cursor = metadb_conn.cursor()
     except psycopg2.Error as err:
         raise RuntimeError("metadata database connection error: '{}'"
@@ -398,10 +399,7 @@ def export(dsid, metadb_config, wagtaildb_config, **kwargs):
                         "select distinct grid_definition_codes from "
                         "\"WGrML\"." + dsid + "_agrids2"))
                 res = metadb_cursor.fetchall()
-                min_wlon = 999.
-                min_slat = 999.
-                max_elon = -999.
-                max_nlat = -999.
+                min_wlon, min_slat, max_elon, max_nlat = None, None, None, None
                 for e in res:
                     bvals = uncompress_bitmap_values(e[0])
                     for val in bvals:
@@ -410,15 +408,19 @@ def export(dsid, metadb_config, wagtaildb_config, **kwargs):
                                 "grid_definitions where code = %s"),
                                 (str(val), ))
                         gdef = metadb_cursor.fetchone()
-                        wlon, slat, elon, nlat = (
-                                spatial_domain_from_grid_definition(
-                                        gdef, centerOn="primeMeridian"))
-                        min_wlon = min(wlon, min_wlon)
-                        min_slat = min(slat, min_slat)
-                        max_elon = max(elon, max_elon)
-                        max_nlat = max(nlat, max_nlat)
+                        domain = spatial_domain_from_grid_definition(
+                                gdef, centerOn="primeMeridian")
+                        if all(domain):
+                            min_wlon = (domain[0] if min_wlon is None else
+                                        min(domain[0], min_wlon))
+                            min_slat = (domain[1] if min_slat is None else
+                                        min(domain[1], min_slat))
+                            max_elon = (domain[2] if max_elon is None else
+                                        max(domain[2], max_elon))
+                            max_nlat = (domain[3] if max_nlat is None else
+                                        max(domain[3], max_nlat))
 
-                if min_wlon < 999.:
+                if min_wlon is not None:
                     dc_data['geoLocations'].append({
                             'geoLocationBox': {
                                 'westBoundLongitude': str(min_wlon),
@@ -446,7 +448,7 @@ def export(dsid, metadb_config, wagtaildb_config, **kwargs):
         license_id = xml_root.find("./dataLicense")
         license_id = "CC-BY-4.0" if license_id is None else license_id.text
         try:
-            wagtaildb_conn = psycopg2.connect(**wagtaildb_config)
+            wagtaildb_conn = psycopg2.connect(**wagtaildb_settings)
             wagtaildb_cursor = wagtaildb_conn.cursor()
         except psycopg2.Error as err:
             raise RuntimeError("wagtail database connection error: '{}'"
