@@ -7,7 +7,7 @@ from ..metautils import open_dataset_overview
 from ..xmlutils import convert_html_to_text
 
 
-def export(dsid, metadb_settings):
+def export(dsid, metadb_settings, **kwargs):
     try:
         conn = psycopg2.connect(**metadb_settings)
         cursor = conn.cursor()
@@ -161,4 +161,5 @@ def export(dsid, metadb_settings):
     finally:
         conn.close()
 
-    return json.dumps(jsonld_data, indent=4)
+    indent = kwargs['indent'] if 'indent' in kwargs else None
+    return json.dumps(jsonld_data, indent=indent)
