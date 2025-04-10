@@ -29,7 +29,7 @@ def export(dsid, metadb_settings, **kwargs):
         if len(res[3]) > 0:
             id = "{}/{}".format(settings.DOI_DOMAIN, res[3])
         else:
-            id = "{}/{}/".format(settings.GDEX_DATASETS_URL, dsid)
+            id = "{}/{}/".format(settings.ARCHIVE['datasets_url'], dsid)
 
         jsonld_data = {
             '@context': "http://schema.org",
@@ -39,7 +39,7 @@ def export(dsid, metadb_settings, **kwargs):
             'description': summary,
             'publisher': {
                 '@type': "Organization",
-                'name': settings.PUBLISHER,
+                'name': settings.ARCHIVE['pub_name'],
             },
             'datePublished': str(res[2]),
             'author': {},
@@ -49,8 +49,7 @@ def export(dsid, metadb_settings, **kwargs):
         lst = xml_root.findall("./author")
         if len(lst) > 0:
             for e in lst:
-                type = e.get(
-                        "{http://www.w3.org/2001/XMLSchema-instance}type")
+                type = e.get("{" + nsmap['xsi'] +"}type")
                 if type is None or type == "authorPerson":
                     d = {
                             '@type': "Person",
