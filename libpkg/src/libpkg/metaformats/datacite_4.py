@@ -23,7 +23,7 @@ def get_mandatory_fields(dsid, xml_root, cursor):
                 'resourceType':
                     xml_root.find("./topic[@vocabulary='ISO']").text
             },
-            'publisher': settings.PUBLISHER}
+            'publisher': settings.ARCHIVE['pub_name']}
     mand['creators'] = []
     lst = xml_root.findall("./author")
     if len(lst) > 0:
@@ -99,7 +99,7 @@ def to_xml(dc_data, **kwargs):
     warnings = []
     nsmap = {
         None: "http://datacite.org/schema/kernel-4",
-        "xsi": "http://www.w3.org/2001/XMLSchema-instance"
+        'xsi': "http://www.w3.org/2001/XMLSchema-instance"
     }
     attr_qname = etree.QName(
             "http://www.w3.org/2001/XMLSchema-instance",
@@ -108,7 +108,7 @@ def to_xml(dc_data, **kwargs):
     root = etree.Element(
             "resource",
             {attr_qname: (
-                "http://datacite.org/schema/kernel-4 " + xsd)},
+                " ".join([nsmap[None], xsd]))},
             nsmap=nsmap)
     if 'doi' in dc_data:
         etree.SubElement(root, "identifier", identifierType="DOI").text = (
