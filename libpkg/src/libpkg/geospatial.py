@@ -9,10 +9,12 @@ def fill_geographic_extent_data(dsid, cursor):
                     "where s.dsid = %s"), (dsid, ))
     res = cursor.fetchall()
     if len(res) > 0:
+        hres = {}
         for e in res:
             domain = spatial_domain_from_grid_definition(
                     e, centerOn="primeMeridian")
             if all(domain.values()):
+                geo_data['is_grid'] = True
                 geo_data['wlon'] = (
                         domain['wlon'] if geo_data['wlon'] is None else
                         min(domain['wlon'], geo_data['wlon']))
@@ -25,6 +27,17 @@ def fill_geographic_extent_data(dsid, cursor):
                 geo_data['nlat'] = (
                         domain['nlat'] if geo_data['nlat'] is None else
                         max(domain['nlat'], geo_data['nlat']))
+                parts = e[1].split(":")
+                if e[0] in ("polarStereographic", "lambertConformal"):
+                    uom = "m"
+                    dist = str(float(parts[6]) * 1000)
+                else:
+                    uom = "degree"
+                    dist = parts[6]
+
+                hres[dist + uom] = {'uom': uom, 'dist': dist}
+
+        geo_data.update({'hres': hres})
 
     else:
         pass
