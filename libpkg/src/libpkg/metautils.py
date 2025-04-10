@@ -30,7 +30,7 @@ def get_date_from_precision(dt, precision, tz):
         return "-".join(dparts)
 
 
-def get_dataset_size(dsid, cursor):
+def get_dataset_size(dsid, cursor, **kwargs):
     cursor.execute("select dweb_size from dssdb.dataset where dsid = %s",
                    (dsid, ))
     res = cursor.fetchone()
@@ -46,10 +46,16 @@ def get_dataset_size(dsid, cursor):
         size = int(res[0])
         num_div = 0
         while size > 999.999999:
+            if ('valueOnly' in kwargs and units[num_div] ==
+                    kwargs['valueOnly']):
+                break
             size /= 1000.
             num_div += 1
 
-        return str(round(size, 3)) + " " + units[num_div]
+        size = str(round(size, 3))
+        if 'valueOnly' not in kwargs:
+            size += " " + units[num_div]
+        return size
 
     return None
 
