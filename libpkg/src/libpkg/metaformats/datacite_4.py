@@ -113,6 +113,8 @@ def to_xml(dc_data, **kwargs):
     identifier = etree.SubElement(root, "identifier", identifierType="DOI")
     if 'doi' in dc_data:
         identifier.text = dc_data['doi']
+    else:
+        identifier.text = "N/A"
 
     if len(dc_data['creators']) > 0:
         creators = etree.SubElement(root, "creators")
