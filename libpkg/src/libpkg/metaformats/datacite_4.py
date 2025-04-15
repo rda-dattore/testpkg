@@ -110,9 +110,9 @@ def to_xml(dc_data, **kwargs):
             {attr_qname: (
                 " ".join([nsmap[None], xsd]))},
             nsmap=nsmap)
+    identifier = etree.SubElement(root, "identifier", identifierType="DOI")
     if 'doi' in dc_data:
-        etree.SubElement(root, "identifier", identifierType="DOI").text = (
-                dc_data['doi'])
+        identifier.text = dc_data['doi']
 
     if len(dc_data['creators']) > 0:
         creators = etree.SubElement(root, "creators")
