@@ -411,14 +411,14 @@ def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
                         domain = spatial_domain_from_grid_definition(
                                 gdef, centerOn="primeMeridian")
                         if all(domain):
-                            min_wlon = (domain[0] if min_wlon is None else
-                                        min(domain[0], min_wlon))
-                            min_slat = (domain[1] if min_slat is None else
-                                        min(domain[1], min_slat))
-                            max_elon = (domain[2] if max_elon is None else
-                                        max(domain[2], max_elon))
-                            max_nlat = (domain[3] if max_nlat is None else
-                                        max(domain[3], max_nlat))
+                            min_wlon = (domain['wlon'] if min_wlon is None else
+                                        min(domain['wlon'], min_wlon))
+                            min_slat = (domain['slat'] if min_slat is None else
+                                        min(domain['slat'], min_slat))
+                            max_elon = (domain['elon'] if max_elon is None else
+                                        max(domain['elon'], max_elon))
+                            max_nlat = (domain['nlat'] if max_nlat is None else
+                                        max(domain['nlat'], max_nlat))
 
                 if min_wlon is not None:
                     dc_data['geoLocations'].append({
