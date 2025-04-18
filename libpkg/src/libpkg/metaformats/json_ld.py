@@ -49,7 +49,7 @@ def export(dsid, metadb_settings, **kwargs):
         lst = xml_root.findall("./author")
         if len(lst) > 0:
             for e in lst:
-                type = e.get("{" + nsmap['xsi'] +"}type")
+                type = e.get("{http://www.w3.org/2001/XMLSchema-instance}type")
                 if type is None or type == "authorPerson":
                     d = {
                             '@type': "Person",
