@@ -3,7 +3,7 @@ import psycopg2
 from lxml import etree
 
 from . import settings
-from ..metautils import open_dataset_overview
+from ..metautils import get_date_from_precision, open_dataset_overview
 from ..xmlutils import convert_html_to_text
 
 
@@ -77,6 +77,23 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
                 settings.ARCHIVE['pub_name'])
         etree.SubElement(root, dc_ns + "date").text = (
                 "Published: " + str(pub_date))
+        mcursor.execute((
+                "select min(concat(date_start, ' ', time_start)), min("
+                "start_flag), max(concat(date_end, ' ', time_end)), min("
+                "end_flag), min(time_zone) from dssdb.dsperiod where dsid = "
+                "%s and date_start < '9998-01-01' and date_end < "
+                "'9998-01-01'"), (dsid, ))
+        res = mcursor.fetchone()
+        if res is not None:
+            tz = res[4]
+            idx = tz.find(",")
+            if idx > 0:
+                tz = tz[0:idx]
+
+            etree.SubElement(root, dc_ns + "date").text = (
+                "Valid: " + get_date_from_precision(res[0], res[1], tz) +
+                " to " + get_date_from_precision(res[2], res[3], tz))
+
         mcursor.execute((
                 "select keyword from search.topics where dsid = %s and "
                 "vocabulary = 'ISO'"), (dsid, ))
