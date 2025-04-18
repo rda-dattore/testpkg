@@ -76,7 +76,7 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
         etree.SubElement(root, dc_ns + "publisher").text = (
                 settings.ARCHIVE['pub_name'])
         etree.SubElement(root, dc_ns + "date").text = (
-                "Published: " + pub_date)
+                "Published: " + str(pub_date))
         mcursor.execute((
                 "select keyword from search.topics where dsid = %s and "
                 "vocabulary = 'ISO'"), (dsid, ))
