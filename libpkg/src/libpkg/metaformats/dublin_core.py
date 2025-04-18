@@ -24,7 +24,7 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
     warnings = []
     try:
         mcursor.execute((
-                "select title, summary pub_date, from search.datasets where "
+                "select title, summary, pub_date from search.datasets where "
                 "dsid = %s"), (dsid, ))
         title, summary, pub_date = mcursor.fetchone()
         summary = convert_html_to_text("<summary>" + summary + "</summary>")
@@ -75,8 +75,8 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
 
         etree.SubElement(root, dc_ns + "publisher").text = (
                 settings.ARCHIVE['pub_name'])
-        etree.SubElement(root, dc_ns + "date").text = ("Published: " +
-                pub_date)
+        etree.SubElement(root, dc_ns + "date").text = (
+                "Published: " + pub_date)
         mcursor.execute((
                 "select keyword from search.topics where dsid = %s and "
                 "vocabulary = 'ISO'"), (dsid, ))
