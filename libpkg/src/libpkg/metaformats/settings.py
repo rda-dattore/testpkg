@@ -12,6 +12,7 @@ ARCHIVE = {
                     "topography/bathymetry, vegetation, and land use."),
     'url': "https://rda.ucar.edu",
     'datasets_url': "https://rda.ucar.edu/datasets",
+    'email': "rdahelp@ucar.edu",
 }
 
 DOI_DOMAIN = "https://doi.org"
