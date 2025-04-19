@@ -87,7 +87,8 @@ def export(dsid, metadb_settings, wagtaildb_settings):
                 os.path.join(settings.ARCHIVE['datasets_url'], dsid))
         personnel = etree.SubElement(root, "Personnel")
         etree.SubElement(personnel, "Role").text = "Technical Contact"
-        etree.SubElement(personnel, "Email").text = "rdahelp@ucar.edu"
+        etree.SubElement(personnel, "Email").text = (
+                settings.ARCHIVE['email'])
         mcursor.execute((
                 "select g.path from search.variables as v left join search."
                 "gcmd_sciencekeywords as g on g.uuid = v.keyword where v.dsid "
@@ -201,7 +202,7 @@ def export(dsid, metadb_settings, wagtaildb_settings):
         etree.SubElement(center, "Data_Set_ID").text = dsid
         etree.SubElement(
                 etree.SubElement(center, "Personnel"), "Email").text = (
-                "rdahelp@ucar.edu")
+                settings.ARCHIVE['email'])
         etree.SubElement(
                 etree.SubElement(root, "Distribution"),
                 "Distribution_Size").text = get_dataset_size(dsid, mcursor)
