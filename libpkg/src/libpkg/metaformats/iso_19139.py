@@ -316,7 +316,7 @@ def add_di_point_of_contact(root, nsmap):
                     ci_address,
                     "{" + nsmap['gmd'] + "}electronicMailAddress"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
-            "rdahelp@ucar.edu")
+            settings.ARCHIVE['email'])
     etree.SubElement(
             etree.SubElement(
                     ci_responsibleparty, "{" + nsmap['gmd'] + "}role"),
@@ -809,7 +809,7 @@ def add_distribution_info(root, nsmap, dsid, size):
                     ci_address,
                     "{" + nsmap['gmd'] + "}electronicMailAddress"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
-            "rdahelp@ucar.edu")
+            settings.ARCHIVE['email'])
     ci_onlineresource = etree.SubElement(
             etree.SubElement(
                     ci_contact, "{" + nsmap['gmd'] + "}onlineResource"),
