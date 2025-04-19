@@ -19,7 +19,6 @@ def export(dsid, metadb_settings, wagtaildb_settings):
         raise RuntimeError("metadata database connection error: '{}'"
                            .format(err))
 
-    warnings = []
     try:
         publisher_keyword = (
                 "UCAR/NCAR/CISL/DECS > Data Engineering and Curation Section, "
@@ -232,5 +231,4 @@ def export(dsid, metadb_settings, wagtaildb_settings):
         mconn.close()
         wconn.close()
 
-    return (etree.tostring(root, pretty_print=True).decode("utf-8"),
-            "\n".join(warnings))
+    return etree.tostring(root, pretty_print=True).decode("utf-8")

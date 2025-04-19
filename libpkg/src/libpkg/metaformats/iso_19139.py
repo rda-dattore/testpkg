@@ -944,7 +944,6 @@ def export(dsid, metadb_settings, wagtaildb_settings):
     except psycopg2.Error as err:
         raise RuntimeError("metadata database connection error: '{}'"
                            .format(err))
-    warnings = []
     try:
         mcursor.execute(("select timestamp_utc, title, summary, pub_date, "
                          "continuing_update from search.datasets where dsid = "
@@ -994,5 +993,4 @@ def export(dsid, metadb_settings, wagtaildb_settings):
         mconn.close()
         wconn.close()
 
-    return (etree.tostring(root, pretty_print=True).decode("utf-8"),
-            "\n".join(warnings))
+    return etree.tostring(root, pretty_print=True).decode("utf-8")

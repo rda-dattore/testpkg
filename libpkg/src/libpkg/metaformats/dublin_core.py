@@ -21,7 +21,6 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
         raise RuntimeError("metadata database connection error: '{}'"
                            .format(err))
 
-    warnings = []
     try:
         mcursor.execute((
                 "select title, summary, pub_date from search.datasets where "
@@ -147,8 +146,7 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
         mconn.close()
         wconn.close()
 
-    return (etree.tostring(root, pretty_print=True).decode("utf-8"),
-            "\n".join(warnings))
+    return etree.tostring(root, pretty_print=True).decode("utf-8")
 
 
 def export(dsid, metadb_settings, wagtail_settings, **kwargs):
