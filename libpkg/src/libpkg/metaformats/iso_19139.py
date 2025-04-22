@@ -168,12 +168,6 @@ def add_related_resources(root, nsmap, related_resources):
                 url[0:url.find("://")])
         etree.SubElement(
                 etree.SubElement(
-                        ci_onlineresource,
-                        "{" + nsmap['gmd'] + "}applicationProfile"),
-                "{" + nsmap['gco'] + "}CharacterString").text = (
-                "browser")
-        etree.SubElement(
-                etree.SubElement(
                         ci_onlineresource, "{" + nsmap['gmd'] + "}name"),
                 "{" + nsmap['gco'] + "}CharacterString").text = (
                 "Related Resource #" + str(x+1))
@@ -853,11 +847,6 @@ def add_distribution_info(root, nsmap, dsid, size):
             durl[0:durl.find("://")])
     etree.SubElement(
             etree.SubElement(
-                    ci_onlineresource,
-                    "{" + nsmap['gmd'] + "}applicationProfile"),
-            "{" + nsmap['gco'] + "}CharacterString").text = "browser"
-    etree.SubElement(
-            etree.SubElement(
                     ci_onlineresource, "{" + nsmap['gmd'] + "}name"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
             "Dataset Description")
@@ -888,11 +877,6 @@ def add_distribution_info(root, nsmap, dsid, size):
                     "{" + nsmap['gmd'] + "}protocol"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
             durl[0:durl.find("://")])
-    etree.SubElement(
-            etree.SubElement(
-                    ci_onlineresource,
-                    "{" + nsmap['gmd'] + "}applicationProfile"),
-            "{" + nsmap['gco'] + "}CharacterString").text = "browser"
     etree.SubElement(
             etree.SubElement(
                     ci_onlineresource, "{" + nsmap['gmd'] + "}name"),
