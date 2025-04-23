@@ -362,7 +362,7 @@ def add_maint_frequency(root, nsmap, xml_root, dsid):
                             "{" + nsmap['mmi'] + "}MD_MaintenanceInformation"),
                     "{" + nsmap['mmi'] + "}maintenanceAndUpdateFrequency"),
             "{" + nsmap['mmi'] + "}MD_MaintenanceFrequencyCode",
-            codeList=("http://standards.iso.org/iso/19115/resources/Codelist/"
+            codeList=("http://standards.iso.org/iso/19115/resources/Codelists/"
                       "cat/codelists.xml#MD_MaintenanceFrequencyCode"),
             codeListValue=freq).text = freq
 
@@ -469,7 +469,7 @@ def add_gcmd_keywords(root, nsmap, cursor, dsid, concept):
                 etree.SubElement(md_keywords, "{" + nsmap['mri'] + "}type"),
                 "{" + nsmap['mri'] + "}MD_KeywordTypeCode",
                 codeList=("http://standards.iso.org/iso/19115/resources/"
-                          "Codelist/cat/codelists.xml#MD_KeywordTypeCode"),
+                          "Codelists/cat/codelists.xml#MD_KeywordTypeCode"),
                 codeListValue="theme").text = "theme"
         ci_citation = (
                 etree.SubElement(
@@ -498,10 +498,95 @@ def add_gcmd_keywords(root, nsmap, cursor, dsid, concept):
                         " Keywords")
 
 
-def add_data_identification(root, nsmap, cursor, xml_root, dsid):
-    cursor.execute(("select title, summary, pub_date, continuing_update from "
-                    "search.datasets where dsid = %s"), (dsid, ))
-    title, abstract, pub_date, progress = cursor.fetchone()
+def add_constraints(root, nsmap, cursor, dsid):
+    md_constraints = (
+            etree.SubElement(
+                    etree.SubElement(
+                            root, "{" + nsmap['mri'] + "}resourceConstraints"),
+                    "{" + nsmap['mco'] + "}MD_LegalConstraints"))
+    cursor.execute(("select access_restrict from wagtail."
+                    "dataset_description_datasetdescriptionpage "
+                    "where dsid = %s"), (dsid, ))
+    access = cursor.fetchone()
+    if access is not None and len(access[0]) > 0:
+        code = "otherRestrictions"
+        access = convert_html_to_text("<access>" + access[0] + "</access>")
+        etree.SubElement(
+                etree.SubElement(
+                        md_constraints, "{" + nsmap['mco'] + "}useLimitation"),
+                "{" + nsmap['gco'] + "}CharacterString").text = access
+    else:
+        code = "unrestricted"
+
+    etree.SubElement(
+            etree.SubElement(
+                    md_constraints, "{" + nsmap['mco'] + "}accessConstraints"),
+            "{" + nsmap['mco'] + "}MD_RestrictionCode",
+            codeList=("http://standards.iso.org/iso/19115/resources/Codelists/"
+                      "cat/codelists.xml#MD_RestrictionCode"),
+            codeListValue=code).text = code
+    cursor.execute(("select usage_restrict from wagtail."
+                    "dataset_description_datasetdescriptionpage "
+                    "where dsid = %s"), (dsid, ))
+    usage = cursor.fetchone()
+    if usage is not None and len(usage[0]) > 0:
+        md_constraints = (
+                etree.SubElement(
+                        etree.SubElement(
+                                root,
+                                "{" + nsmap['mri'] + "}resourceConstraints"),
+                        "{" + nsmap['mco'] + "}MD_LegalConstraints"))
+        etree.SubElement(
+                etree.SubElement(
+                        md_constraints,
+                        "{" + nsmap['mco'] + "}accessConstraints"),
+                "{" + nsmap['mco'] + "}MD_RestrictionCode",
+                codeList=("http://standards.iso.org/iso/19115/resources/"
+                          "Codelists/cat/codelists.xml#MD_RestrictionCode"),
+                codeListValue="otherRestrictions").text = "otherRestrictions"
+
+
+def add_associated_resources(root, nsmap, cursor, dsid):
+    cursor.execute((
+            "select related_rsrc_list from wagtail."
+            "dataset_description_datasetdescriptionpage where dsid = %s"),
+            (dsid, ))
+    rsrcs = cursor.fetchone()
+    if rsrcs is not None and len(rsrcs) > 0:
+        for rsrc in rsrcs[0]:
+            ci_citation = (
+                etree.SubElement(
+                        etree.SubElement(
+                                etree.SubElement(
+                                        etree.SubElement(
+                                                root,
+                                                ("{" + nsmap['mri'] +
+                                                 "}associatedResource")),
+                                        ("{" + nsmap['mri'] +
+                                         "}MD_AssociatedResource")),
+                                "{" + nsmap['mri'] + "}name"),
+                        "{" + nsmap['cit'] + "}CI_Citation"))
+            etree.SubElement(
+                    etree.SubElement(
+                            ci_citation, "{" + nsmap['cit'] + "}title"),
+                    "{" + nsmap['gco'] + "}CharacterString").text = (
+                            rsrc['description'])
+            etree.SubElement(
+                    etree.SubElement(
+                            etree.SubElement(
+                                    etree.SubElement(
+                                            ci_citation,
+                                            ("{" + nsmap['cit'] +
+                                             "}onlineResource")),
+                                    "{" + nsmap['cit'] + "}CI_OnlineResource"),
+                            "{" + nsmap['cit'] + "}linkage"),
+                    "{" + nsmap['gco'] + "}CharacterString").text = rsrc['url']
+
+
+def add_data_identification(root, nsmap, mcursor, wcursor, xml_root, dsid):
+    mcursor.execute(("select title, summary, pub_date, continuing_update from "
+                     "search.datasets where dsid = %s"), (dsid, ))
+    title, abstract, pub_date, progress = mcursor.fetchone()
     abstract = convert_html_to_text(
             "<abstract>" + abstract + "</abstract>")
     progress = "onGoing" if progress == "Y" else "completed"
@@ -533,10 +618,10 @@ def add_data_identification(root, nsmap, cursor, xml_root, dsid):
             codeList=("http://standards.iso.org/iso/19115/-3/cit/1.0/"
                       "codelists.html#CI_DateTypeCode"),
             codeListValue="publication").text = "publication"
-    cursor.execute((
+    mcursor.execute((
             "select doi from dssdb.dsvrsn where dsid = %s and status = 'A'"),
             (dsid, ))
-    doi = cursor.fetchone()
+    doi = mcursor.fetchone()
     if doi is not None:
         md_ident = (
                 etree.SubElement(
@@ -560,7 +645,7 @@ def add_data_identification(root, nsmap, cursor, xml_root, dsid):
                 etree.SubElement(md_ident, "{" + nsmap['mcc'] + "}codeSpace"),
                 "{" + nsmap['gco'] + "}CharacterString").text = "doi"
 
-    add_authors(ci_citation, nsmap, cursor, dsid)
+    add_authors(ci_citation, nsmap, mcursor, dsid)
     etree.SubElement(
             etree.SubElement(data_ident, "{" + nsmap['mri'] + "}abstract"),
             "{" + nsmap['gco'] + "}CharacterString").text = abstract
@@ -606,7 +691,7 @@ def add_data_identification(root, nsmap, cursor, xml_root, dsid):
                     "{" + nsmap['cit'] + "}electronicMailAddress"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
                     settings.ARCHIVE['email'])
-    geoext = fill_geographic_extent_data(dsid, cursor)
+    geoext = fill_geographic_extent_data(dsid, mcursor)
     if 'is_grid' in geoext and geoext['is_grid']:
         etree.SubElement(
                 etree.SubElement(data_ident,
@@ -614,7 +699,7 @@ def add_data_identification(root, nsmap, cursor, xml_root, dsid):
                                   "}spatialRepresentationType")),
                 "{" + nsmap['mcc'] + "}MD_SpatialRepresentationTypeCode",
                 codeList=("http://standards.iso.org/iso/19115/resources/"
-                          "Codelist/cat/codelists.xml#"
+                          "Codelists/cat/codelists.xml#"
                           "MD_SpatialRepresentationTypeCode"),
                 codeListValue="grid").text = "grid"
 
@@ -632,7 +717,7 @@ def add_data_identification(root, nsmap, cursor, xml_root, dsid):
                     "{" + nsmap['gco'] + "}Distance",
                     uom=val['uom']).text = val['dist']
 
-    add_extent(data_ident, nsmap, cursor, dsid, geoext)
+    add_extent(data_ident, nsmap, mcursor, dsid, geoext)
     add_references(data_ident, nsmap)
     if progress == "onGoing":
         add_maint_frequency(data_ident, nsmap, xml_root, dsid)
@@ -641,11 +726,91 @@ def add_data_identification(root, nsmap, cursor, xml_root, dsid):
     if logo is not None and logo.text.find("default") != 0:
         add_graphic_overview(data_ident, nsmap, logo)
 
-    add_data_formats(data_ident, nsmap, cursor, dsid)
-    add_gcmd_keywords(data_ident, nsmap, cursor, dsid, "sciencekeywords")
-    add_gcmd_keywords(data_ident, nsmap, cursor, dsid, "platforms")
-    add_gcmd_keywords(data_ident, nsmap, cursor, dsid, "projects")
-    add_gcmd_keywords(data_ident, nsmap, cursor, dsid, "instruments")
+    add_data_formats(data_ident, nsmap, mcursor, dsid)
+    add_gcmd_keywords(data_ident, nsmap, mcursor, dsid, "sciencekeywords")
+    add_gcmd_keywords(data_ident, nsmap, mcursor, dsid, "platforms")
+    add_gcmd_keywords(data_ident, nsmap, mcursor, dsid, "projects")
+    add_gcmd_keywords(data_ident, nsmap, mcursor, dsid, "instruments")
+    add_constraints(data_ident, nsmap, wcursor, dsid)
+    add_associated_resources(data_ident, nsmap, wcursor, dsid)
+
+
+def add_distribution_info(root, nsmap, dsid):
+    md_distrib = (
+            etree.SubElement(
+                    etree.SubElement(
+                            root, "{" + nsmap['mdb'] + "}distributionInfo"),
+                    "{" + nsmap['mrd'] + "}MD_Distribution"))
+    ci_respons = (
+        etree.SubElement(
+                etree.SubElement(
+                        etree.SubElement(
+                                etree.SubElement(
+                                        md_distrib,
+                                        "{" + nsmap['mrd'] + "}distributor"),
+                                "{" + nsmap['mrd'] + "}MD_Distributor"),
+                        "{" + nsmap['mrd'] + "}distributorContact"),
+                "{" + nsmap['cit'] + "}CI_Responsibility"))
+    etree.SubElement(
+            etree.SubElement(ci_respons, "{" + nsmap['cit'] + "}role"),
+            "{" + nsmap['cit'] + "}CI_RoleCode",
+            codeList=("http://standards.iso.org/iso/19115/-3/cit/1.0/"
+                      "codelists.xml#CI_RoleCode"),
+            codeListValue="distributor").text = "distributor"
+    ci_org = (
+            etree.SubElement(
+                    etree.SubElement(
+                            ci_respons, "{" + nsmap['cit'] + "}party"),
+                    "{" + nsmap['cit'] + "}CI_Organisation"))
+    etree.SubElement(
+            etree.SubElement(ci_org, "{" + nsmap['cit'] + "}name"),
+            "{" + nsmap['gco'] + "}CharacterString").text = (
+                    settings.ARCHIVE['name'])
+    ci_address = (
+            etree.SubElement(
+                    etree.SubElement(
+                            etree.SubElement(
+                                    etree.SubElement(
+                                            ci_org,
+                                            ("{" + nsmap['cit'] +
+                                             "}contactInfo")),
+                                    "{" + nsmap['cit'] + "}CI_Contact"),
+                            "{" + nsmap['cit'] + "}address"),
+                    "{" + nsmap['cit'] + "}CI_Address"))
+    etree.SubElement(
+            etree.SubElement(
+                    ci_address,
+                    "{" + nsmap['cit'] + "}electronicMailAddress"),
+            "{" + nsmap['gco'] + "}CharacterString").text = "rdahelp@ucar.edu"
+    ci_online = (
+            etree.SubElement(
+                    etree.SubElement(
+                            etree.SubElement(
+                                    etree.SubElement(
+                                            md_distrib,
+                                            ("{" + nsmap['mrd'] +
+                                             "}transferOptions")),
+                                    ("{" + nsmap['mrd'] +
+                                     "}MD_DigitalTransferOptions")),
+                            "{" + nsmap['mrd'] + "}onLine"),
+                    "{" + nsmap['cit'] + "}CI_OnlineResource"))
+    etree.SubElement(
+            etree.SubElement(ci_online, "{" + nsmap['cit'] + "}linkage"),
+            "{" + nsmap['gco'] + "}CharacterString").text = (
+                    os.path.join(settings.ARCHIVE['url'], "datasets", "dsid"))
+    etree.SubElement(
+            etree.SubElement(ci_online, "{" + nsmap['cit'] + "}protocol"),
+            "{" + nsmap['gco'] + "}CharacterString").text = "https"
+    etree.SubElement(
+            etree.SubElement(ci_online, "{" + nsmap['cit'] + "}name"),
+            "{" + nsmap['gco'] + "}CharacterString").text = (
+                   "Data Access for " + dsid)
+    etree.SubElement(
+            etree.SubElement(ci_online, "{" + nsmap['cit'] + "}function"),
+            "{" + nsmap['cit'] + "}CI_OnLineFunctionCode",
+            codeList=("http://standards.iso.org/iso/19115/-3/cit/1.0/"
+                      "codelists.xml#CI_OnLineFunctionCode"),
+            codeListValue="download").text = "download"
 
 
 def export(dsid, metadb_settings, wagtaildb_settings):
@@ -687,7 +852,8 @@ def export(dsid, metadb_settings, wagtaildb_settings):
         add_metadata_standard(root, nsmap)
         add_alt_metadata_ref(root, nsmap)
         add_metadata_linkage(root, nsmap, dsid)
-        add_data_identification(root, nsmap, mcursor, xml_root, dsid)
+        add_data_identification(root, nsmap, mcursor, wcursor, xml_root, dsid)
+        add_distribution_info(root, nsmap, dsid)
     finally:
         mconn.close()
         wconn.close()
