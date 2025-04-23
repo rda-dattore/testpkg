@@ -730,7 +730,7 @@ def add_data_identification(root, nsmap, mcursor, wcursor, dsid):
             "select dslogo from wagtail."
             "dataset_description_datasetdescriptionpage where dsid = %s"),
             (dsid, ))
-    logo = cursor.fetchone()
+    logo = wcursor.fetchone()
     if logo is not None and len(logo) > 0:
         add_graphic_overview(data_ident, nsmap, logo[0])
 
