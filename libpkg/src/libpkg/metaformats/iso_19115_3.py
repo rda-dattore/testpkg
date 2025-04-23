@@ -6,7 +6,7 @@ from lxml import etree
 
 from . import settings
 from ..geospatial import fill_geographic_extent_data
-from ..metautils import get_date_from_precision, open_dataset_overview
+from ..metautils import get_date_from_precision
 from ..strutils import snake_to_capital
 from ..xmlutils import convert_html_to_text
 
@@ -342,15 +342,19 @@ def add_references(root, nsmap):
     pass
 
 
-def add_maint_frequency(root, nsmap, xml_root, dsid):
-    freq = xml_root.find("./continuingUpdate").get("frequency")
-    if freq == "bi-monthly":
+def add_maint_frequency(root, nsmap, cursor, dsid):
+    cursor.execute((
+            "select update_freq from wagtail."
+            "dataset_description_datasetdescriptionpage where dsid = %s"),
+            (dsid, ))
+    freq, = cursor.fetchone()
+    if freq == "Bi-monthly":
         freq = "monthly"
-    elif freq == "half-yearly":
+    elif freq == "Half-yearly":
         freq = "biannually"
-    elif freq == "yearly":
+    elif freq == "Yearly":
         freq = "annually"
-    elif freq == "irregularly":
+    elif freq == "Irregularly":
         freq = "irregular"
 
     etree.SubElement(
@@ -377,7 +381,7 @@ def add_graphic_overview(root, nsmap, graphic):
             etree.SubElement(md_graphic, "{" + nsmap['mcc'] + "}fileName"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
                     os.path.join(settings.ARCHIVE['url'], "images/ds_logos",
-                                 graphic.text))
+                                 graphic))
     etree.SubElement(
             etree.SubElement(
                     md_graphic, "{" + nsmap['mcc'] + "}fileDescription"),
@@ -386,7 +390,7 @@ def add_graphic_overview(root, nsmap, graphic):
     etree.SubElement(
             etree.SubElement(md_graphic, "{" + nsmap['mcc'] + "}fileType"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
-                    graphic.text[(graphic.text.find(".")+1):])
+                    graphic[(graphic.rfind(".")+1):])
 
 
 def add_data_formats(root, nsmap, cursor, dsid):
@@ -583,7 +587,7 @@ def add_associated_resources(root, nsmap, cursor, dsid):
                     "{" + nsmap['gco'] + "}CharacterString").text = rsrc['url']
 
 
-def add_data_identification(root, nsmap, mcursor, wcursor, xml_root, dsid):
+def add_data_identification(root, nsmap, mcursor, wcursor, dsid):
     mcursor.execute(("select title, summary, pub_date, continuing_update from "
                      "search.datasets where dsid = %s"), (dsid, ))
     title, abstract, pub_date, progress = mcursor.fetchone()
@@ -720,11 +724,15 @@ def add_data_identification(root, nsmap, mcursor, wcursor, xml_root, dsid):
     add_extent(data_ident, nsmap, mcursor, dsid, geoext)
     add_references(data_ident, nsmap)
     if progress == "onGoing":
-        add_maint_frequency(data_ident, nsmap, xml_root, dsid)
+        add_maint_frequency(data_ident, nsmap, wcursor, dsid)
 
-    logo = xml_root.find("./logo")
-    if logo is not None and logo.text.find("default") != 0:
-        add_graphic_overview(data_ident, nsmap, logo)
+    wcursor.execute((
+            "select dslogo from wagtail."
+            "dataset_description_datasetdescriptionpage where dsid = %s"),
+            (dsid, ))
+    logo = cursor.fetchone()
+    if logo is not None and len(logo) > 0:
+        add_graphic_overview(data_ident, nsmap, logo[0])
 
     add_data_formats(data_ident, nsmap, mcursor, dsid)
     add_gcmd_keywords(data_ident, nsmap, mcursor, dsid, "sciencekeywords")
@@ -845,14 +853,13 @@ def export(dsid, metadb_settings, wagtaildb_settings):
                 "{" + nsmap['mdb'] + "}MD_Metadata",
                 {schema_loc: " ".join([xsd_head, xsd])},
                 nsmap=nsmap)
-        xml_root = open_dataset_overview(dsid)
         add_metadata_identifier(root, nsmap, dsid)
         add_contact(root, nsmap)
         add_metadata_date(root, nsmap, mcursor, dsid)
         add_metadata_standard(root, nsmap)
         add_alt_metadata_ref(root, nsmap)
         add_metadata_linkage(root, nsmap, dsid)
-        add_data_identification(root, nsmap, mcursor, wcursor, xml_root, dsid)
+        add_data_identification(root, nsmap, mcursor, wcursor, dsid)
         add_distribution_info(root, nsmap, dsid)
     finally:
         mconn.close()
