@@ -10,7 +10,8 @@ def open_dataset_overview(dsid):
         raise RuntimeError(("unable to download dataset overview: status "
                             "code: {}".format(resp.status_code)))
 
-    return etree.fromstring(resp.text)
+    parser = etree.XMLParser(remove_blank_text=True)
+    return etree.fromstring(resp.text, parser=parser)
 
 
 def get_date_from_precision(dt, precision, tz):
