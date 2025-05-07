@@ -57,14 +57,24 @@ def export(dsid, metadb_settings):
         convert_gcmd_uuids(xml_root, "instrument", "instruments", cursor)
         lst = xml_root.findall("./relatedDataset")
         for el in lst:
-            dsid = el.get("ID")
-            if len(dsid) == 5 and dsid[3] == '.':
-                dsid = 'd' + dsid[0:3] + "00" + dsid[-1]
-                el.set("ID", dsid)
+            id = el.get("ID")
+            if len(id) == 5 and id[3] == '.':
+                id = 'd' + id[0:3] + "00" + id[-1]
+                el.set("ID", id)
 
         cmd = xml_root.find("./contentMetadata")
         if cmd is None:
-            pass
+            periods = []
+            cursor.execute((
+                    "select min(concat(p.date_start, ' ', p.time_start)), "
+                    "string_agg(distinct cast(p.start_flag as text), ','), "
+                    "max(concat(p.date_end, ' ', p.time_end)), string_agg("
+                    "distinct p.time_zone, ','), g.pindex from dssdb.dsperiod "
+                    "as p left join dssdb.dsgroup as g on g.gindex = p.gindex "
+                    "where p.dsid = %s group by g.pindex"), (dsid, ))
+            res = cursor.fetchall()
+            if len(res) > 0:
+                periods = [row for row in res]
 
     finally:
         conn.close()
