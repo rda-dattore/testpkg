@@ -731,8 +731,10 @@ def add_data_identification(root, nsmap, mcursor, wcursor, dsid):
             "dataset_description_datasetdescriptionpage where dsid = %s"),
             (dsid, ))
     logo = wcursor.fetchone()
-    if logo is not None and len(logo) > 0:
-        add_graphic_overview(data_ident, nsmap, logo[0])
+    if logo is not None:
+        logo = logo[0]
+        if len(logo) > 0 and logo.find("default") != 0:
+            add_graphic_overview(data_ident, nsmap, logo)
 
     add_data_formats(data_ident, nsmap, mcursor, dsid)
     add_gcmd_keywords(data_ident, nsmap, mcursor, dsid, "sciencekeywords")
