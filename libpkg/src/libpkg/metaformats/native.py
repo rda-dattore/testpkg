@@ -2,7 +2,7 @@ import psycopg2
 
 from lxml import etree
 
-from ..metautils import open_dataset_overview
+from ..metautils import get_date_from_precision, open_dataset_overview
 
 
 def convert_gcmd_uuids(xml_root, element, concept, cursor):
@@ -64,17 +64,30 @@ def export(dsid, metadb_settings):
 
         cmd = xml_root.find("./contentMetadata")
         if cmd is None:
-            periods = []
+            el_set = {'periods': [], 'data_types': [], 'data_formats': []}
             cursor.execute((
                     "select min(concat(p.date_start, ' ', p.time_start)), "
                     "string_agg(distinct cast(p.start_flag as text), ','), "
                     "max(concat(p.date_end, ' ', p.time_end)), string_agg("
-                    "distinct p.time_zone, ','), g.pindex from dssdb.dsperiod "
-                    "as p left join dssdb.dsgroup as g on g.gindex = p.gindex "
-                    "where p.dsid = %s group by g.pindex"), (dsid, ))
+                    "distinct p.time_zone, ','), g2.grpid from dssdb.dsperiod "
+                    "as p left join dssdb.dsgroup as g on g.dsid = p.dsid and "
+                    "g.gindex = p.gindex left join dssdb.dsgroup as g2 on g2."
+                    "dsid = p.dsid and g2.gindex = g.pindex where p.dsid = %s "
+                    "group by g2.grpid"), (dsid, ))
             res = cursor.fetchall()
             if len(res) > 0:
-                periods = [row for row in res]
+                el_set['periods'] = [row for row in res]
+
+            if any(el_set.values()):
+                cmd = etree.SubElement(xml_root, "contentMetadata")
+                for period in el_set['periods']:
+                    etree.SubElement(
+                            cmd, "temporal",
+                            start=get_date_from_precision(
+                                    period[0], int(period[1]), period[3]),
+                            end=get_date_from_precision(
+                                    period[2], int(period[1]), period[3]),
+                            groupID=period[4])
 
     finally:
         conn.close()
