@@ -64,7 +64,31 @@ def export(dsid, metadb_settings):
 
         cmd = xml_root.find("./contentMetadata")
         if cmd is None:
-            el_set = {'periods': [], 'data_types': [], 'data_formats': []}
+            el_set = {'periods': [], 'data_types': set(),
+                      'data_formats': set()}
+            cursor.execute((
+                    "select distinct schemaname from pg_tables where "
+                    "tablename like %s"), ("%" + dsid + "%", ))
+            res = cursor.fetchall()
+            for dtype, in res:
+                if dtype == "WGrML":
+                    el_set['data_types'].add("grid")
+
+                if dtype == "WObML":
+                    el_set['data_types'].add("platform_observation")
+
+                if dtype == "WFixML":
+                    el_set['data_types'].add("cyclone_fix")
+
+                if dtype[0] == 'W':
+                    cursor.execute((
+                        "select distinct f.format from \"" + dtype + "\"." +
+                        dsid + "_webfiles2 as w left join \"" + dtype + "\"."
+                        "formats as f on f.code = w.format_code"))
+                    fmts = cursor.fetchall()
+                    for fmt in fmts:
+                        el_set['data_formats'].add(fmt[0])
+
             cursor.execute((
                     "select min(concat(p.date_start, ' ', p.time_start)), "
                     "string_agg(distinct cast(p.start_flag as text), ','), "
@@ -80,14 +104,23 @@ def export(dsid, metadb_settings):
 
             if any(el_set.values()):
                 cmd = etree.SubElement(xml_root, "contentMetadata")
+                for dtype in el_set['data_types']:
+                    etree.SubElement(cmd, "dataType").text = dtype
+
                 for period in el_set['periods']:
-                    etree.SubElement(
+                    temporal = etree.SubElement(
                             cmd, "temporal",
                             start=get_date_from_precision(
                                     period[0], int(period[1]), period[3]),
                             end=get_date_from_precision(
-                                    period[2], int(period[1]), period[3]),
-                            groupID=period[4])
+                                    period[2], int(period[1]), period[3]))
+                    if period[4] == None:
+                        temporal.set("groupID", "Entire Dataset")
+                    else:
+                        temporal.set("groupID", period[4])
+
+                for fmt in el_set['data_formats']:
+                    etree.SubElement(cmd, "format").text = fmt
 
     finally:
         conn.close()
