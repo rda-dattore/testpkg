@@ -47,7 +47,9 @@ def export(dsid, metadb_settings):
                 author.attrib.pop("mname")
                 author.attrib.pop("lname")
                 if type is None:
-                    author.set("type", "authorPerson")
+                    author.set(
+                            "{http://www.w3.org/2001/XMLSchema-instance}type",
+                            "authorPerson")
 
             else:
                 author.text = author.get("name")
