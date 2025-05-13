@@ -46,6 +46,9 @@ def export(dsid, metadb_settings):
                 author.attrib.pop("fname")
                 author.attrib.pop("mname")
                 author.attrib.pop("lname")
+                if type is None:
+                    author.set("type", "authorPerson")
+
             else:
                 author.text = author.get("name")
                 author.attrib.pop("name")
