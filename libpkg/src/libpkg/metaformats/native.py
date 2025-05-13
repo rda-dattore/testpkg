@@ -39,7 +39,7 @@ def export(dsid, metadb_settings):
         for author in authors:
             type = author.get(
                     "{http://www.w3.org/2001/XMLSchema-instance}type")
-            if type == "authorPerson":
+            if type in (None, "authorPerson"):
                 author.text = (
                         " ".join([author.get("fname"), author.get("mname"),
                                   author.get("lname")]).replace("  ", " "))
@@ -114,7 +114,7 @@ def export(dsid, metadb_settings):
                                     period[0], int(period[1]), period[3]),
                             end=get_date_from_precision(
                                     period[2], int(period[1]), period[3]))
-                    if period[4] == None:
+                    if period[4] is None:
                         temporal.set("groupID", "Entire Dataset")
                     else:
                         temporal.set("groupID", period[4])
