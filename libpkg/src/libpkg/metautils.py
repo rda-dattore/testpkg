@@ -28,6 +28,9 @@ def get_date_from_precision(dt, precision, tz):
         while len(dparts) > precision:
             del dparts[-1]
 
+        if tz == "BCE":
+            dparts[0] = "-" + dparts[0]
+
         return "-".join(dparts)
 
 
