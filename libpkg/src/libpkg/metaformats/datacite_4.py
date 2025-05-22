@@ -346,13 +346,31 @@ def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
                 'schemeUri': "https://gcmd.earthdata.nasa.gov/kms",
                 'subjectScheme': "GCMD"})
 
+        dc_data['dates'] = []
         metadb_cursor.execute((
-                "select min(concat(date_start, ' ', time_start)), min("
-                "start_flag), max(concat(date_end, ' ', time_end)), min("
-                "end_flag), min(time_zone) from dssdb.dsperiod where dsid = "
-                "%s and date_start > '0001-01-01' and date_start < "
-                "'3000-01-01' and date_end > '0001-01-01' and date_end < "
-                "'3000-01-01'"), (dsid, ))
+                "select min(p.date_start), min(p.start_flag), max(p."
+                "date_end), min(p.end_flag) from (select cast(date_start as "
+                "text), start_flag, cast(date_end as text), end_flag from "
+                "dssdb.dsperiod where dsid = %s and time_zone = 'BCE') as p "
+                "having min(p.date_start) is not null and max(p.date_end) is "
+                "not null"), (dsid, ))
+        res = metadb_cursor.fetchone()
+        if res is not None:
+            dc_data['dates'].append(
+                {'date': (get_date_from_precision(res[0], res[1], 'BCE') +
+                          " to " + get_date_from_precision(res[2], res[3],
+                                                           'BCE')),
+                 'dateType': "Valid"})
+
+        metadb_cursor.execute((
+                "select min(p.start), min(p.start_flag), max(p.end), max(p."
+                "end_flag), min(p.time_zone) from (select concat(date_start, "
+                "' ', time_start) as start, start_flag, concat(date_end, ' ', "
+                "time_end) as end, end_flag, time_zone from dssdb.dsperiod "
+                "where dsid = %s and date_start between '0001-01-01' and "
+                "'3000-01-01' and date_end between '0001-01-01' and "
+                "'3000-01-01' and time_zone != 'BCE') as p having min(p."
+                "start) is not null and max(p.end) is not null"), (dsid, ))
         res = metadb_cursor.fetchone()
         if res is not None:
             tz = res[4]
@@ -360,10 +378,10 @@ def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
             if idx > 0:
                 tz = tz[0:idx]
 
-            dc_data['dates'] = [
+            dc_data['dates'].append(
                 {'date': (get_date_from_precision(res[0], res[1], tz) + " to "
                           + get_date_from_precision(res[2], res[3], tz)),
-                 'dateType': "Valid"}]
+                 'dateType': "Valid"})
 
         metadb_cursor.execute((
                 "select c.doi_work, w.type, count(a.last_name) from citation."
