@@ -165,7 +165,7 @@ def to_xml(dc_data, **kwargs):
                     "contributor",
                     contributorType=c['contributorType']),
             "contributorName").text = c['name']
-    if len(dc_data['dates'] > 0:
+    if len(dc_data['dates']) > 0:
         d = dc_data['dates'][0]
         etree.SubElement(
                 etree.SubElement(root, "dates"),
