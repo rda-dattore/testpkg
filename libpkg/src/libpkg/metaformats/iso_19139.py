@@ -268,7 +268,7 @@ def add_di_citation(root, nsmap, nil_reason, dsid, authors, cursor, title,
             etree.SubElement(ci_responsibleparty,
                              "{" + nsmap['gmd'] + "}organisationName"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
-            settings.ARCHIVE['pub_name'])
+            settings.ARCHIVE['pub_name']['default'])
     etree.SubElement(
             etree.SubElement(ci_responsibleparty,
                              "{" + nsmap['gmd'] + "}role"),

@@ -73,7 +73,7 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
                     contributor[0])
 
         etree.SubElement(root, dc_ns + "publisher").text = (
-                settings.ARCHIVE['pub_name'])
+                settings.ARCHIVE['pub_name']['default'])
         etree.SubElement(root, dc_ns + "date").text = (
                 "Published: " + str(pub_date))
         mcursor.execute((

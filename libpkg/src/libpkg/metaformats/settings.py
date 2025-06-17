@@ -1,6 +1,9 @@
 ARCHIVE = {
     'name': "NSF NCAR Research Data Archive",
-    'pub_name': "UCAR/NCAR - Research Data Archive",
+    'pub_name': {
+        'default': "UCAR/NCAR - Research Data Archive",
+        'icarus': "ICARUS Community",
+    },
     'description': ("The Research Data Archive (RDA), managed by the Data "
                     "Engineering and Curation Section (DECS) of the "
                     "Computational and Information Systems Laboratory (CISL) "
