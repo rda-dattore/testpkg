@@ -15,15 +15,22 @@ from ..xmlutils import convert_html_to_text
 
 
 def get_mandatory_fields(dsid, xml_root, cursor):
-    mand = {'titles': [
+    mand = {
+        'titles': [
                 {'title': xml_root.find("./title").text}
-            ],
-            'types': {
-                'resourceTypeGeneral': "Dataset",
-                'resourceType':
-                    xml_root.find("./topic[@vocabulary='ISO']").text
-            },
-            'publisher': settings.ARCHIVE['pub_name']}
+        ],
+        'types': {
+            'resourceTypeGeneral': "Dataset",
+            'resourceType':
+                xml_root.find("./topic[@vocabulary='ISO']").text
+        }
+    }
+    if (mand['titles'][0]['title'][0:26].lower() ==
+            "icarus chamber experiment:"):
+        mand['publisher'] = settings.ARCHIVE['pub_name']['icarus']
+    else:
+        mand['publisher'] = settings.ARCHIVE['pub_name']['default']
+
     mand['creators'] = []
     lst = xml_root.findall("./author")
     if len(lst) > 0:
