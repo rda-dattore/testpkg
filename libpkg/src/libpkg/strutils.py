@@ -142,7 +142,7 @@ def strip_punctuation(word):
         stripped = True
 
     while (len(word) > 0 and word[-1] in
-            (',', ';', ':', '\'', '"', '\\', '.', '!')):
+            (',', ';', ':', '\'', '"', '\\', '.', '!', '?')):
         word = word[:-1]
         stripped = True
 
