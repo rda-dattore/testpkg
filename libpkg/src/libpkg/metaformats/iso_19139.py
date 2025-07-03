@@ -969,10 +969,11 @@ def export(dsid, metadb_settings, wagtaildb_settings):
         nil_reason = etree.QName(
                 nsmap['gco'],
                 "nilReason")
-        xsd = nsmap['gmd'] + "/gmd.xsd"
         root = etree.Element(
                 "{" + nsmap['gmd'] + "}MD_Metadata",
-                {schema_loc: " ".join([nsmap['gmd'], xsd])},
+                {schema_loc: " ".join([
+                        nsmap['gmd'], nsmap['gmd'] + "/gmd.xsd",
+                        nsmap['gmx'], nsmap['gmx'] + "/gmx.xsd"])},
                 nsmap=nsmap)
         xml_root = open_dataset_overview(dsid)
         add_file_identifier(root, nsmap, dsid)
