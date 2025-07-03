@@ -211,6 +211,10 @@ def add_di_citation(root, nsmap, nil_reason, dsid, authors, cursor, title,
                 'type': "P",
                 'name': (author.get("lname") + ", " + author.get("fname") + " "
                          + author.get("mname")).strip()})
+            orcid_id = author.get("orcid_id")
+            if orcid_id is not None:
+                author_list[-1].update({'orcid_id': orcid_id})
+
         else:
             author_list.append({'type': "O", 'name': author.get("name")})
 
@@ -236,12 +240,24 @@ def add_di_citation(root, nsmap, nil_reason, dsid, authors, cursor, title,
                         "{" + nsmap['gmd'] + "}citedResponsibleParty"),
                 "{" + nsmap['gmd'] + "}CI_ResponsibleParty")
         if author['type'] == "P":
-            etree.SubElement(
-                    etree.SubElement(
-                            ci_responsibleparty,
-                            "{" + nsmap['gmd'] + "}individualName"),
-                    "{" + nsmap['gco'] + "}CharacterString").text = (
-                    author['name'])
+            individual_name = etree.SubElement(
+                    ci_responsibleparty,
+                    "{" + nsmap['gmd'] + "}individualName")
+            if 'orcid_id' in author:
+                anchor = etree.SubElement(
+                        individual_name,
+                        "{" + nsmap['gmx'] + "}Anchor")
+                anchor.set("{" + nsmap['xlink'] + "}href",
+                           "http://orcid.org/" + author['orcid_id'])
+                anchor.set("{" + nsmap['xlink'] + "}title", author['name'])
+                anchor.set("{" + nsmap['xlink'] + "}actuate", "onRequest")
+                anchor.text = author['name']
+            else:
+                etree.SubElement(
+                        individual_name,
+                        "{" + nsmap['gco'] + "}CharacterString").text = (
+                        author['name'])
+
         else:
             etree.SubElement(
                     etree.SubElement(
@@ -940,7 +956,9 @@ def export(dsid, metadb_settings, wagtaildb_settings):
             'gmd': "http://www.isotc211.org/2005/gmd",
             'gco': "http://www.isotc211.org/2005/gco",
             'gml': "http://www.opengis.net/gml",
+            'gmx': "http://www.isotc211.org/2005/gmx",
             'xsi': "http://www.w3.org/2001/XMLSchema-instance",
+            'xlink': "http://www.w3.org/1999/xlink",
         }
         schema_loc = etree.QName(
                 nsmap['xsi'],
