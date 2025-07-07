@@ -252,7 +252,7 @@ def add_di_citation(root, nsmap, nil_reason, dsid, authors, cursor, title,
                         "{" + nsmap['gmx'] + "}Anchor")
                 anchor.set("{" + nsmap['xlink'] + "}href",
                            "http://orcid.org/" + author['orcid_id'])
-                anchor.set("{" + nsmap['xlink'] + "}title", author['name'])
+                anchor.set("{" + nsmap['xlink'] + "}title", author['title'])
                 anchor.set("{" + nsmap['xlink'] + "}actuate", "onRequest")
                 anchor.text = author['name']
             else:
