@@ -210,10 +210,10 @@ def add_di_citation(root, nsmap, nil_reason, dsid, authors, cursor, title,
             author_list.append({
                 'type': "P",
                 'name': (author.get("lname") + ", " + author.get("fname") + " "
-                         + author.get("mname")).strip()})
-                #'name': ((author.get("fname") + " " +
-                #          author.get("mname")).strip() + " " +
-                #         author.get("lname"))})
+                         + author.get("mname")).strip(),
+                'title': ((author.get("fname") + " " +
+                          author.get("mname")).strip() + " " +
+                          author.get("lname"))})
             orcid_id = author.get("orcid_id")
             if orcid_id is not None:
                 author_list[-1].update({'orcid_id': orcid_id})
