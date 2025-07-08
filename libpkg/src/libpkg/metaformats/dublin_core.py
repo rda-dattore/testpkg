@@ -75,7 +75,7 @@ def export_html_meta(dsid, metadb_settings):
         res = cursor.fetchone()
         meta_tags.append('<meta name="DC.title" content="' + res[0] + '"/>')
         meta_tags.append((
-                '<meta name="DC.date" content="' + res[1] +
+                '<meta name="DC.date" content="' + str(res[1]) +
                 '" scheme="DCTERMS.W3CDTF"/>'))
         meta_tags.append((
                 '<meta name="DC.publisher" content="' +
