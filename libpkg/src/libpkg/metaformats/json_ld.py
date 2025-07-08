@@ -134,8 +134,6 @@ def export(dsid, metadb_settings, **kwargs):
 
         jsonld_data['temporalCoverage'] = sdate + "/" + edate
         geoext = fill_geographic_extent_data(dsid, cursor)
-        print(geoext)
-        print(all(geoext.values()))
         if all(geoext.values()):
             jsonld_data['spatialCoverage'] = {'@type': "Place"}
             if (geoext['wlon'] == geoext['elon'] and geoext['slat'] ==
