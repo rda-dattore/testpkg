@@ -8,7 +8,94 @@ from ..xmlutils import convert_html_to_text
 
 
 def export_html_meta(dsid, metadb_settings):
-    pass
+    try:
+        conn = psycopg2.connect(**metadb_settings)
+        cursor = conn.cursor()
+    except psycopg2.Error as err:
+        raise RuntimeError("metadata database connection error: '{}'"
+                           .format(err))
+
+    try:
+        meta_tags = []
+        meta_tags.append('<meta name="DC.type" content="Dataset"/>')
+        cursor.execute((
+                "select doi from dssdb.dsvrsn where dsid = %s and status = "
+                "'A'"), (dsid, ))
+        doi = cursor.fetchone()
+        if doi is not None and len(doi[0]) > 0:
+            identifier = "https://doi.org/" + doi[0]
+        else:
+            identifier = "https://rda.ucar.edu/datasets/" + dsid
+
+        meta_tags.append(
+                '<meta name="DC.identifier" content="' + identifier + '"/>')
+        cursor.execute((
+                "select type, given_name, middle_name, family_name from "
+                "search.dataset_authors where dsid = %s"), (dsid, ))
+        authors = cursor.fetchall()
+        if len(authors) > 0:
+            for author in authors:
+                if author[0] == "Person":
+                    meta_tags.append((
+                            '<meta name="DC.creator" content="' + author[3] +
+                            ', ' + (author[1] + ' ' + author[2]).strip() +
+                            '"/>'))
+                else:
+                    meta_tags.append((
+                            '<meta name="DC.creator" content="' + author[1] +
+                            '"/>'))
+        else:
+            cursor.execute((
+                    "select g.path,c.contact from search.contributors_new as "
+                    "c left join search.gcmd_providers as g on g.uuid = c."
+                    "keyword where c.dsid = %s and c.vocabulary = 'GCMD'"),
+                    (dsid, ))
+            contributors = cursor.fetchall()
+            if len(contributors) == 0:
+                raise RuntimeError("no contributors were found for " + dsid)
+
+            for contributor in contributors:
+                parts = contributor[0].split(" > ")
+                if parts[-1] == "UNAFFILIATED INDIVIDUAL":
+                    idx = contributor[1].find(",")
+                    if idx < 0:
+                        idx = None
+
+                    meta_tags.append((
+                            '<meta name="DC.creator" content="' +
+                            contributor[1][0:idx] + '"/>'))
+                else:
+                    meta_tags.append((
+                            '<meta name="DC.creator" content="' +
+                            parts[-1].replace(", ", "/") + '"/>'))
+
+        cursor.execute((
+                "select title, pub_date, summary from search.datasets where "
+                "dsid = %s"), (dsid, ))
+        res = cursor.fetchone()
+        meta_tags.append('<meta name="DC.title" content="' + res[0] + '"/>')
+        meta_tags.append((
+                '<meta name="DC.date" content="' + res[1] +
+                '" scheme="DCTERMS.W3CDTF"/>'))
+        meta_tags.append((
+                '<meta name="DC.publisher" content="' +
+                settings.ARCHIVE['pub_name']['default'] + '"/>'))
+        summary = convert_html_to_text("<summary>" + res[2] + "</summary>")
+        meta_tags.append((
+                '<meta name="DC.description" content="' +
+                summary.replace("\n", "\\n") + '"/>'))
+        cursor.execute((
+                "select g.path from search.variables as v left join search."
+                "gcmd_sciencekeywords as g on g.uuid = v.keyword where v."
+                "dsid = %s and v.vocabulary = 'GCMD'"), (dsid, ))
+        subjects = cursor.fetchall()
+        for subject in subjects:
+            meta_tags.append(
+                    '<meta name="DC.subject" content="' + subject[0] + '"/>')
+    finally:
+        conn.close()
+
+    return "\n".join(meta_tags)
 
 
 def export_oai_dc(dsid, metadb_settings, wagtail_settings):
