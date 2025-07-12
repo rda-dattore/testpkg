@@ -118,7 +118,12 @@ def convert_grid_definition(gdef):
                 ("{}&deg; x ~{}&deg; from {} to {} and {} to {} <small>(").
                 format(grid_data[6], round(yres, 3), grid_data[3],
                        grid_data[5], grid_data[2], grid_data[4]))
-        cdef += ")</small>"
+        if grid_data[0] == "-1":
+            cdef += "reduced n{}".format(int(grid_data[1]) / 2)
+        else:
+            cdef += "{} x {}".format(grid_data[0], grid_data[1])
+
+        cdef += "Longitude/Gaussian Latitude)</small>"
         return cdef
     elif gdef[0] == "lambertConformal":
         return ""
