@@ -123,7 +123,7 @@ def convert_grid_definition(gdef):
         else:
             cdef += "{} x {}".format(grid_data[0], grid_data[1])
 
-        cdef += "Longitude/Gaussian Latitude)</small>"
+        cdef += " Longitude/Gaussian Latitude)</small>"
         return cdef
     elif gdef[0] == "lambertConformal":
         return ""
