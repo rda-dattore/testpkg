@@ -101,3 +101,30 @@ def spatial_domain_from_grid_definition(gdef, **kwargs):
         pass
 
     return domain
+
+
+def convert_grid_definition(gdef):
+    grid_data = gdef[1].split(":")
+    if gdef[0] == "gaussLatLon":
+        slat = float(grid_data[2][0:-1])
+        elat = float(grid_data[4][0:-1])
+        if ((grid_data[2][-1], grid_data[4][-1]) == ("N", "S") or
+                (grid_data[2][-1], grid_data[4][-1]) == ("S", "N")):
+            yres = (slat + elat) / (float(grid_data[1]) - 1)
+        else:
+            yres = (slat - elat) / (float(grid_data[1]) - 1)
+
+        cdef = (
+                ("{}&deg; x ~{}&deg; from {} to {} and {} to {} <small>(").
+                format(grid_data[6], round(yres, 3), grid_data[3],
+                       grid_data[5], grid_data[2], grid_data[4]))
+        cdef += ")</small>"
+        return cdef
+    elif gdef[0] == "lambertConformal":
+        return ""
+    elif gdef[0] == "latLon" or gdef[0] == "mercator":
+        return ""
+    elif gdef[0] == "polarStereographic":
+        return ""
+    elif gdef[0] == "sphericalHarmonics":
+        return ""
