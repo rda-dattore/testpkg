@@ -126,9 +126,33 @@ def convert_grid_definition(gdef):
         cdef += " Longitude/Gaussian Latitude)</small>"
         return cdef
     elif gdef[0] == "lambertConformal":
-        return ""
+        return (
+                ("{}km x {}km (at {}) oriented {} <small>({} x {} Lambert "
+                 "Conformal starting at {}, {})</small>")
+                .format(grid_data[7], grid_data[8], grid_data[4], grid_data[5],
+                        grid_data[0], grid_data[1], grid_data[2],
+                        grid_data[3]))
     elif gdef[0] == "latLon" or gdef[0] == "mercator":
-        return ""
+        cdef = "{}&deg; x ".format(grid_data[6])
+        if gdef[0] == "mercator":
+            cdef += "~"
+
+        cdef += (
+                ("{}&deg; from {} to {} and {} to {} <small>(")
+                .format(grid_data[7], grid_data[3], grid_data[5], grid_data[2],
+                        grid_data[4]))
+        if grid_data[0] == "-1":
+            cdef += "reduced"
+        else:
+            cdef += "{} x {}".format(grid_data[0], grid_data[1])
+
+        if gdef[0] == "latLon":
+            cdef += " Latitude/Longitude"
+        elif gdef[0] == "mercator":
+            cdef += " Mercator"
+
+        cdef += ")</small>"
+        return cdef
     elif gdef[0] == "polarStereographic":
         return ""
     elif gdef[0] == "sphericalHarmonics":
