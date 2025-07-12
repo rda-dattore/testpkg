@@ -154,6 +154,28 @@ def convert_grid_definition(gdef):
         cdef += ")</small>"
         return cdef
     elif gdef[0] == "polarStereographic":
-        return ""
+        cdef = "{}km x {}km (at".format(grid_data[7], grid_data[8])
+        if len(grid_data[4]) > 0:
+            cdef += grid_data[4]
+        else:
+            cdef += "60" + grid_data[6]
+
+        if grid_data[6] == "N":
+            orient = "North"
+        else:
+            orient = "South"
+
+        cdef += (
+                (") oriented {} <small>({} x {} {} Polar Stereographic)"
+                 "</small>").format(grid_data[5], grid_data[0], grid_data[1],
+                                    orient))
+        return cdef
     elif gdef[0] == "sphericalHarmonics":
-        return ""
+        cdef = "Spherical Harmonics at "
+        if grid_data[2] == grid_data[0] and grid_data[0] == grid_data[1]:
+            cdef += "T"
+        elif int(grid_data[1]) == (int(grid_data[1]) + int(grid_data[2])):
+            cdef += "R"
+
+        cdef += "{} spectral resolution".format(grid_data[1])
+        return cdef
