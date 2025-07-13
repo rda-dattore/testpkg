@@ -25,6 +25,7 @@ def ll_from_polar_gridpoint(gridpoint_dict, grid_dict):
     if x == 0. and y == 0.:
         ll_dict = {'lat': 90., 'elon': 360.}
     else:
+        ll_dict = {}
         r2 = (x * x) + (y * y)
         R_EARTH = 6.3712e+6
         re2 = math.pow(
