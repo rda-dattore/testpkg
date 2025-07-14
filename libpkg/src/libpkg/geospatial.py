@@ -30,7 +30,7 @@ def fill_geographic_extent_data(dsid, cursor):
                 parts = e[1].split(":")
                 if e[0] in ("polarStereographic", "lambertConformal"):
                     uom = "m"
-                    dist = str(float(parts[6]) * 1000)
+                    dist = str(float(parts[7]) * 1000)
                 else:
                     uom = "degree"
                     dist = parts[6]
