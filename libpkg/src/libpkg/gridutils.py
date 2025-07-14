@@ -1,4 +1,9 @@
+import math
 import re
+
+from .gridpoints import (
+        ll_from_lambert_conformal_gridpoint,
+        ll_from_polar_gridpoint)
 
 
 def decode_latitude(lats):
@@ -17,18 +22,126 @@ def decode_elongitude(lons):
     return lon
 
 
+def fill_spatial_domain_from_lambert_conformal_grid(def_params):
+    domain = {'slat': 99., 'nlat': -99., 'wlon': 999., 'elon': -999.}
+    ni = int(def_params[0])
+    nj = int(def_params[1])
+    for j in range(0, nj):
+        straddles_prime_meridian = False
+        previous_elon = None
+        for i in range(0, ni):
+            ll = ll_from_lambert_conformal_gridpoint(
+                    {'i': i, 'j': j},
+                    {'ni': int(def_params[0]), 'nj': int(def_params[1]),
+                     'left_lat': decode_latitude(def_params[2]),
+                     'left_elon': decode_elongitude(def_params[3]),
+                     'tan_lat': decode_latitude(def_params[4]),
+                     'orient_elon': decode_elongitude(def_params[5]),
+                     'dx': float(def_params[7])})
+            if ll['lat'] != 99.:
+                if previous_elon is None:
+                    previous_elon = ll['elon']
+
+                if ll['elon'] < 180. and previous_elon > 180.:
+                    straddles_prime_meridian = True
+
+                if straddles_prime_meridian:
+                    ll['elon'] += 360.
+
+                domain['slat'] = min(ll['lat'], domain['slat'])
+                domain['nlat'] = max(ll['lat'], domain['nlat'])
+                domain['wlon'] = min(ll['elon'], domain['wlon'])
+                domain['elon'] = max(ll['elon'], domain['elon'])
+                previous_elon = ll['elon']
+
+    if domain['slat'] != 99.:
+        if domain['wlon'] > 180.:
+            domain['wlon'] -= 360.
+
+        if domain['elon'] > 180.:
+            domain['elon'] -= 360.
+
+    return domain
+
+
+def fill_spatial_domain_from_polar_stereographic_grid(def_params):
+    domain = {'slat': 99., 'nlat': -99., 'wlon': 999., 'elon': -999.}
+    ni = int(def_params[0])
+    nj = int(def_params[1])
+    start_lat = decode_latitude(def_params[2])
+    start_elon = decode_elongitude(def_params[3])
+    tan_lat = decode_latitude(def_params[4])
+    orient_elon = decode_elongitude(def_params[5])
+    dx = float(def_params[7])
+    ll = ll_from_polar_gridpoint({'i': 0, 'j': 0},
+                                 {'ni': ni, 'nj': nj,
+                                  'projection': def_params[6],
+                                  'tan_lat': tan_lat, 'dx': dx,
+                                  'orient_elon': orient_elon})
+    if (abs(ll['lat'] - start_lat) > 0.5 or
+            abs(ll['elon'] - start_elon) > 0.5):
+        yoverx = math.tan(math.radians(start_elon + 270. - orient_elon))
+        if def_params[6] == "S":
+            yoverx = -yoverx
+            pole_x = 1
+            deg_res = dx / (math.cos(math.radians(tan_lat)) * 111.1)
+            max_pole_x = int(360. / deg_res) + 1
+            pole_y = 0
+            while pole_x < max_pole_x:
+                ni = pole_x * 2 - 1
+                pole_y = round(1 - yoverx * (1 - pole_x))
+                nj = pole_y * 2 - 1
+                ll = ll_from_polar_gridpoint({'i': 0, 'j': 0},
+                                             {'ni': ni, 'nj': nj,
+                                              'projection': def_params[6],
+                                              'tan_lat': tan_lat, 'dx': dx,
+                                              'orient_elon': orient_elon})
+                if (abs(ll['lat'] - start_lat) < 0.5 and
+                        abs(ll['elon'] - start_elon) < 0.5):
+                    break
+
+                pole_x += 1
+
+            if pole_x == max_pole_x:
+                return domain
+
+    for j in range(0, nj):
+        for i in range(0, ni):
+            ll = ll_from_polar_gridpoint({'i': i, 'j': j},
+                                         {'ni': ni, 'nj': nj,
+                                          'projection': def_params[6],
+                                          'tan_lat': tan_lat, 'dx': dx,
+                                          'orient_elon': orient_elon})
+            domain['slat'] = min(ll['lat'], domain['slat'])
+            domain['nlat'] = max(ll['lat'], domain['nlat'])
+            domain['wlon'] = min(ll['elon'], domain['wlon'])
+            domain['elon'] = max(ll['elon'], domain['elon'])
+
+    if domain['wlon'] == 0. and domain['elon'] > 359.9:
+        domain['wlon'] = -180.
+        domain['elon'] = 180.
+    else:
+        if domain['wlon'] > 180.:
+            domain['wlon'] -= 360.
+
+        if domain['elon'] > 180.:
+            domain['elon'] -= 360.
+
+    return domain
+
+
 def spatial_domain_from_grid_definition(gdef, **kwargs):
     domain = {'wlon': None, 'slat': None, 'elon': None, 'nlat': None}
-    parts = gdef[1].split(":")
+    def_params = gdef[1].split(":")
     if re.compile("^(latLon|gaussLatLon|mercator)(Cell){0,1}$").match(gdef[0]):
-        start_lat = decode_latitude(parts[2])
-        end_lat = decode_latitude(parts[4])
+        start_lat = decode_latitude(def_params[2])
+        end_lat = decode_latitude(def_params[4])
         domain['slat'] = min(start_lat, end_lat)
         domain['nlat'] = max(start_lat, end_lat)
-        start_elon = decode_elongitude(parts[3])
-        end_elon = decode_elongitude(parts[5])
-        xspace = float(parts[0])
-        xres = float(parts[6])
+        start_elon = decode_elongitude(def_params[3])
+        end_elon = decode_elongitude(def_params[5])
+        xspace = float(def_params[0])
+        xres = float(def_params[6])
         if xspace == 0.:
             # reduced grids
             xspace = (end_elon - start_elon) / xres
@@ -62,7 +175,7 @@ def spatial_domain_from_grid_definition(gdef, **kwargs):
                         is_global_lon = True
 
         if (abs(abs(domain['nlat'] - domain['slat'] +
-                float(parts[7])) - 180.) < 0.001):
+                float(def_params[7])) - 180.) < 0.001):
             domain['slat'] = -90.
             domain['nlat'] = 90.
 
@@ -96,9 +209,9 @@ def spatial_domain_from_grid_definition(gdef, **kwargs):
                                   else start_elon)
 
     elif gdef[0].find("lambertConformal") == 0:
-        pass
+        domain = fill_spatial_domain_from_lambert_conformal_grid(def_params)
     elif gdef[0].find("polarStereographic") == 0:
-        pass
+        domain = fill_spatial_domain_from_polar_stereographic_grid(def_params)
 
     return domain
 
