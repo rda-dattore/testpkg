@@ -239,7 +239,7 @@ def convert_grid_definition(gdef):
         return cdef
     elif gdef[0] == "lambertConformal":
         return (
-                ("{}km x {}km (at {}) oriented {} <small>({} x {} Lambert "
+                ("{}km x {}km (at {}) oriented {} <small>({}x{} Lambert "
                  "Conformal starting at {}, {})</small>")
                 .format(grid_data[7], grid_data[8], grid_data[4], grid_data[5],
                         grid_data[0], grid_data[1], grid_data[2],
