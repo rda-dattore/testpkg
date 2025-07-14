@@ -32,8 +32,7 @@ def fill_spatial_domain_from_lambert_conformal_grid(def_params):
         for i in range(0, ni):
             ll = ll_from_lambert_conformal_gridpoint(
                     {'i': i, 'j': j},
-                    {'ni': int(def_params[0]), 'nj': int(def_params[1]),
-                     'left_lat': decode_latitude(def_params[2]),
+                    {'left_lat': decode_latitude(def_params[2]),
                      'left_elon': decode_elongitude(def_params[3]),
                      'tan_lat': decode_latitude(def_params[4]),
                      'orient_elon': decode_elongitude(def_params[5]),
