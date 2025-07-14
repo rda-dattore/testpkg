@@ -53,7 +53,6 @@ def ll_from_lambert_conformal_gridpoint(gridpoint_dict, grid_dict):
         'i' and 'j' are the gridpoints in lambert-conformal space
 
     grid_dict is a dictionary of grid information:
-        'ni' and 'nj': the number of gridpoints in the i and j directions
         'left_lat': latitude of left-most gridpoint farthest from the pole
                     of projection (e.g. lower-left for N, upper-left for S)
         'left_elon': east longitude of left-most gridpoint farthest from the
@@ -79,7 +78,7 @@ def ll_from_lambert_conformal_gridpoint(gridpoint_dict, grid_dict):
             pow(1. + an, an) *
             pow(math.cos(lat1) / (1. + hemi * math.sin(lat1)), an) / an)
     # find pole point
-    arg = an * math.radians(elon1 - grid_dict['orient_elon'])
+    arg = an * (elon1 - math.radians(grid_dict['orient_elon']))
     pole_i = 1. - hemi * rmll * math.sin(arg)
     pole_j = 1. + rmll * math.cos(arg)
     # radius to the (i, j) point in grid units
@@ -100,8 +99,8 @@ def ll_from_lambert_conformal_gridpoint(gridpoint_dict, grid_dict):
         aninv = 1. / an
         z = (
                 math.pow(an / (R_EARTH / grid_dict['dx']), aninv) /
-                math.pow(math.cos(tan_lat), (1. - an) * aninv) *
-                (1. + an))
+                (math.pow(math.cos(tan_lat), (1. - an) * aninv) *
+                (1. + an)))
         ll_dict['lat'] = (
                 hemi *
                 math.degrees(math.pi / 2. - 2. *
