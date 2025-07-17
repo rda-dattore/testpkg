@@ -745,6 +745,9 @@ def add_related_dslist(dsid, cursor, xml, wconn):
 
 
 def add_format_urls(formats):
+    if len(formats) == 0:
+        return []
+
     data_formats = []
     response = requests.get(
             "https://rda.ucar.edu/metadata/FormatReferences.xml")
@@ -865,9 +868,7 @@ def check_for_auto_content_metadata(dsid, mconn, wconn):
         except psycopg2.Error:
             mconn.rollback()
 
-    if len(formats) > 0:
-        data_formats = add_format_urls(formats)
-
+    data_formats = add_format_urls(formats)
     update_wagtail(dsid, "dataset_description_datasetdescriptionpage",
                    "data_formats", json.dumps(data_formats), wconn)
     update_wagtail(dsid, "dataset_description_datasetdescriptionpage",
