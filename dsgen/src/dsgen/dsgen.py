@@ -1,6 +1,5 @@
 import getopt
 import html
-import inspect
 import json
 import os
 import psycopg2
@@ -1027,13 +1026,16 @@ def print_usage(util_name, err):
         print("Error: {}\n".format(err))
 
     print((
-        ("usage: {} --mdb=<dict> --wdb=<dict> dnnnnnn").format(util_name)
+        ("usage: {} --mdb=<dict> --wdb=<dict> [options...] dnnnnnn")
+        .format(util_name)
         .format(sys.argv[0][sys.argv[0].rfind("/")+1:]) + "\n"
         "\n"
         "--mdb=<dict>   <dict> is the metadata database configuration "
         "dictionary\n"
         "--wdb=<dict>   <dict> is the wagtail database configuration "
         "dictionary\n"
+        "\noptions:\n"
+        "--no-jsonld    don't output <meta> tags and JSON-LD\n"
         "\n"
         "dnnnnnn        dataset ID"
     ))
@@ -1041,20 +1043,18 @@ def print_usage(util_name, err):
 
 
 def main():
-    util_name = inspect.currentframe().f_code.co_name
+    util_name = sys.argv[0].split("/")[-1]
     try:
         arg_len = len(sys.argv[1:])
         if arg_len == 0 or (arg_len > 0 and sys.argv[1] == "-h"):
             raise getopt.GetoptError("")
 
-        opts, args = getopt.getopt(sys.argv[1:], "", ["mdb=", "wdb="])
+        opts, args = getopt.getopt(sys.argv[1:], "",
+                                   ["mdb=", "wdb=", "no-jsonld"])
     except getopt.GetoptError as err:
         print_usage(util_name, err)
 
-    if len(opts) != 2:
-        print_usage(util_name,
-                    "missing or invalid option(s) - check the command usage")
-
+    write_jsonld = True
     for opt in opts:
         if opt[0] == "--mdb":
             try:
@@ -1068,6 +1068,19 @@ def main():
             except Exception:
                 print_usage(util_name, "bad wagtail database configuration")
 
+        elif opt[0] == "--no-jsonld":
+            write_jsonld = False
+
+    errs = []
+    if 'metadb_config' not in locals():
+        errs.append("missing metadata database configuration")
+
+    if 'wagtaildb_config' not in locals():
+        errs.append("missing wagtail database configuration")
+
+    if len(errs) > 0:
+        print_usage(util_name, "\n".join(errs))
+
     dsid = args[0]
     try:
         mconn = psycopg2.connect(**metadb_config)
@@ -1079,7 +1092,8 @@ def main():
             sys.exit(0)
 
         wconn = psycopg2.connect(**wagtaildb_config)
-        write_meta_and_jsonld(dsid, metadb_config, wagtaildb_config)
+        if write_jsonld:
+            write_meta_and_jsonld(dsid, metadb_config, wagtaildb_config)
         update_wagtail(dsid, "dataset_description_datasetdescriptionpage",
                        "dstype", type, wconn)
         update_wagtail_from_metadata_db(dsid, mconn.cursor(), wconn)
