@@ -26,7 +26,7 @@ def export(dsid, metadb_settings, **kwargs):
 
         summary = convert_html_to_text(
                 "<summary>" + res[1].replace("&amp;", "&") + "</summary>")
-        if len(res[3]) > 0:
+        if res[3] is not None and len(res[3]) > 0:
             id = "{}/{}".format(settings.DOI_DOMAIN, res[3])
         else:
             id = "{}/{}/".format(settings.ARCHIVE['datasets_url'], dsid)
