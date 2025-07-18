@@ -117,22 +117,24 @@ def export(dsid, metadb_settings, **kwargs):
                         "date_start < '9998-01-01' and date_end < "
                         "'9998-01-01' group by dsid"), (dsid, ))
         res = cursor.fetchone()
-        num_parts = int(res[4])
-        sdate = str(res[0])
-        edate = str(res[2])
-        if num_parts < 3:
-            chop = 3 * (3 - num_parts)
-            sdate = sdate[:-chop]
-            edate = edate[:-chop]
-        else:
-            sdate += "T" + str(res[1])
-            edate += "T" + str(res[3])
-            if num_parts < 6:
-                chop = 3 * (6 - num_parts)
+        if res is not None:
+            num_parts = int(res[4])
+            sdate = str(res[0])
+            edate = str(res[2])
+            if num_parts < 3:
+                chop = 3 * (3 - num_parts)
                 sdate = sdate[:-chop]
                 edate = edate[:-chop]
+            else:
+                sdate += "T" + str(res[1])
+                edate += "T" + str(res[3])
+                if num_parts < 6:
+                    chop = 3 * (6 - num_parts)
+                    sdate = sdate[:-chop]
+                    edate = edate[:-chop]
 
-        jsonld_data['temporalCoverage'] = sdate + "/" + edate
+            jsonld_data['temporalCoverage'] = sdate + "/" + edate
+
         geoext = fill_geographic_extent_data(dsid, cursor)
         if all(geoext.values()):
             jsonld_data['spatialCoverage'] = {'@type': "Place"}
