@@ -853,7 +853,7 @@ def check_for_auto_content_metadata(dsid, mconn, wconn):
             res = cursor.fetchall()
             if len(res) > 0:
                 has_auto_cmd = True
-                data_types.append(db[1].title())
+                data_types.append(db[1].replace("_", " ").title())
                 for e in res:
                     format = e[0]
                     if format[0:12] == "proprietary_":
@@ -879,7 +879,7 @@ def add_data_types(dsid, xml, wconn):
     dlist = xml.findall("./contentMetadata/dataType")
     data_types = []
     for dtype in dlist:
-        data_types.append(dtype.text.title())
+        data_types.append(dtype.text.replace("_", " ").title())
 
     update_wagtail(dsid, "dataset_description_datasetdescriptionpage",
                    "data_types", json.dumps(data_types), wconn)
