@@ -863,6 +863,9 @@ def check_for_auto_content_metadata(dsid, mconn, wconn):
 
                 if db[1] == "grid":
                     add_gridded_coverage(dsid, cursor, wconn)
+                    update_wagtail(
+                            dsid, "dataset_description_datasetdescriptionpage",
+                            "levels", json.dumps({'list': []}), wconn)
 
         except psycopg2.Error:
             mconn.rollback()
@@ -1015,10 +1018,14 @@ def add_vertical_levels(dsid, xml, wconn):
 
         vlist.append((key, entry))
 
-    vlist.sort()
-    update_wagtail(dsid, "dataset_description_datasetdescriptionpage",
-                   "levels", json.dumps({'list': [e[1] for e in vlist]}),
-                   wconn)
+    if len(vlist) > 0:
+        vlist.sort()
+        update_wagtail(dsid, "dataset_description_datasetdescriptionpage",
+                       "levels", json.dumps({'list': [e[1] for e in vlist]}),
+                       wconn)
+    else:
+        update_wagtail(dsid, "dataset_description_datasetdescriptionpage",
+                       "levels", json.dumps([]), wconn)
 
 
 def print_usage(util_name, err):
