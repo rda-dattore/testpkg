@@ -966,6 +966,22 @@ def add_temporal_frequency(dsid, xml, wconn):
                    "temporal_freq", ", ".join(freqs), wconn)
 
 
+def add_detailed_variables(dsid, xml, wconn):
+    variables = {}
+    det_vars = xml.findall(
+            "./contentMetadata/detailedVariables/detailedVariable")
+    list_entry = re.compile(r"^http(s){0,1}://(.*)\.(.*){1,}/.{2,}$")
+    for var in det_vars:
+        if list_entry.match(var.text):
+            if 'lists' not in variables:
+                variables['lists'] = []
+
+            variables['lists'].append(var.text)
+
+    update_wagtail(dsid, "dataset_description_datasetdescriptionpage",
+                   "variables", json.dumps(variables), wconn)
+
+
 def add_vertical_levels(dsid, xml, wconn):
     vlist = []
     levels = xml.findall("./contentMetadata/levels/level")
@@ -1112,6 +1128,7 @@ def main():
             add_data_types(dsid, xml, wconn)
             add_data_formats(dsid, xml, wconn)
             add_temporal_frequency(dsid, xml, wconn)
+            add_detailed_variables(dsid, xml, wconn)
             add_vertical_levels(dsid, xml, wconn)
 
     finally:
