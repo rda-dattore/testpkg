@@ -973,10 +973,8 @@ def add_detailed_variables(dsid, xml, wconn):
     list_entry = re.compile(r"^http(s){0,1}://(.*)\.(.*){1,}/.{2,}$")
     for var in det_vars:
         if list_entry.match(var.text):
-            if 'lists' not in variables:
-                variables['lists'] = []
-
-            variables['lists'].append(var.text)
+            if 'list' not in variables:
+                variables['list'] = var.text
 
     update_wagtail(dsid, "dataset_description_datasetdescriptionpage",
                    "variables", json.dumps(variables), wconn)
