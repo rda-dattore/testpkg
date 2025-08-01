@@ -974,7 +974,7 @@ def add_detailed_variables(dsid, xml, wconn):
             (dsid, ))
     variables = cursor.fetchone()
     if variables is not None:
-        variables = json.loads(variables[0])
+        variables = variables[0]
         det_vars = xml.findall(
                 "./contentMetadata/detailedVariables/detailedVariable")
         list_entry = re.compile(r"^http(s){0,1}://(.*)\.(.*){1,}/.{2,}$")
