@@ -863,9 +863,16 @@ def check_for_auto_content_metadata(dsid, mconn, wconn):
 
                 if db[1] == "grid":
                     add_gridded_coverage(dsid, cursor, wconn)
+                    d = {'list': []}
+                    response = requests.head(
+                            os.path.join("https://rda.ucar.edu/datasets",
+                                         dsid, "metadata/grib2_levels.html"))
+                    if response.status_code == 200:
+                        d['grib2'] = True
+
                     update_wagtail(
                             dsid, "dataset_description_datasetdescriptionpage",
-                            "levels", json.dumps({'list': []}), wconn)
+                            "levels", json.dumps(d), wconn)
 
         except psycopg2.Error:
             mconn.rollback()
