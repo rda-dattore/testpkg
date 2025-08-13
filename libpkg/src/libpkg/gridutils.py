@@ -147,17 +147,21 @@ def spatial_domain_from_grid_definition(gdef, **kwargs):
         else:
             xspace -= 1.
 
-        if (abs((end_elon - start_elon) / xspace - xres) < 0.01):
-            scans_east = True
-        elif abs((end_elon + 360. - start_elon) / xspace - xres) < 0.01:
-            end_elon += 360.
-            scans_east = True
-        elif abs((start_elon - end_elon) / xspace - xres) < 0.01:
-            scans_east = False
-        elif abs((start_elon + 360. - end_elon) / xspace - xres) < 0.01:
-            start_elon += 360.
-            scans_east = False
-        else:
+        try:
+            if (abs((end_elon - start_elon) / xspace - xres) < 0.01):
+                scans_east = True
+            elif abs((end_elon + 360. - start_elon) / xspace - xres) < 0.01:
+                end_elon += 360.
+                scans_east = True
+            elif abs((start_elon - end_elon) / xspace - xres) < 0.01:
+                scans_east = False
+            elif abs((start_elon + 360. - end_elon) / xspace - xres) < 0.01:
+                start_elon += 360.
+                scans_east = False
+            else:
+                return domain
+
+        except Exception:
             return domain
 
         # adjust global grids where boundary is not repeated
