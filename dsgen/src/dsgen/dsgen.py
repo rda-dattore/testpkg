@@ -829,9 +829,13 @@ def add_gridded_coverage(dsid, cursor, wconn):
 
     scov['details'] = []
     for gdef in gdefs:
-        scov['details'].append(convert_grid_definition(gdef))
+        gdef = convert_grid_definition(gdef)
+        if gdef is not None:
+            scov['details'].append(gdef)
 
-    scov['details'].sort()
+    if len(scov['details']) > 1:
+        scov['details'].sort()
+
     update_wagtail(dsid, "dataset_description_datasetdescriptionpage",
                    "spatial_coverage", json.dumps(scov), wconn)
 
