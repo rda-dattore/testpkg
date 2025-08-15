@@ -170,7 +170,7 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
                 "%s and date_start < '9998-01-01' and date_end < "
                 "'9998-01-01'"), (dsid, ))
         res = mcursor.fetchone()
-        if res is not None:
+        if res is not None and all(res):
             tz = res[4]
             idx = tz.find(",")
             if idx > 0:
