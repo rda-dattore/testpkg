@@ -25,7 +25,7 @@ def convert_html_to_text(html, **kwargs):
         node['value'] = wrap_node_value(node['value'], wrap_length, indent_len)
         text += node['value'] + "\n"
 
-    return text.strip()
+    return text.rstrip()
 
 
 def fill_nodes(html):
