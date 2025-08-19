@@ -23,7 +23,7 @@ def convert_html_to_text(html, **kwargs):
             node['value'] = node['value'][:-1]
 
         node['value'] = wrap_node_value(node['value'], wrap_length, indent_len)
-        text += (" " * indent_len) + node['value'] + "\n"
+        text += node['value'] + "\n"
 
     return text.strip()
 
@@ -189,22 +189,24 @@ def wrap_node_value(node_value, wrap_len, indent_len):
         return node_value
 
     indent = " " * indent_len
-    line_len = wrap_len - indent_len
+    if len(indent) > 0:
+        node_value = indent + node_value
+
     n = 0
-    while len(node_value[n:]) > line_len:
+    while len(node_value[n:]) > wrap_len:
         idx = node_value[n:].find("\n")
-        if idx >= 0 and idx <= line_len:
+        if idx >= 0 and idx <= wrap_len:
             n += (idx + 1)
         else:
             m = n
-            n += line_len
+            n += wrap_len
             while n > m and node_value[n] not in (' ', '\n'):
                 n -= 1
 
             if n == m:
                 return node_value
 
-            node_value = indent + node_value[0:n] + "\n" + node_value[n+1:]
+            node_value = node_value[0:n] + "\n" + indent + node_value[n+1:]
             n += 1
 
     return node_value
