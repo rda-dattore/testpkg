@@ -1,21 +1,20 @@
 ARCHIVE = {
-    'name': "NSF NCAR Research Data Archive",
+    'name': "NSF NCAR Geoscience Data Exchange",
     'pub_name': {
-        'default': "UCAR/NCAR - Research Data Archive",
+        'default': "NSF National Center for Atmospheric Research",
         'icarus': "ICARUS Community",
     },
-    'description': ("The Research Data Archive (RDA), managed by the Data "
-                    "Engineering and Curation Section (DECS) of the "
+    'description': ("The Geoscience Data Exchange (GDEX), managed by the "
                     "Computational and Information Systems Laboratory (CISL) "
-                    "at NSF NCAR, contains a large and diverse collection of "
-                    "meteorological and oceanographic observations, "
-                    "operational and reanalysis model outputs, and remote "
-                    "sensing datasets to support atmospheric and geosciences "
-                    "research, along with ancillary datasets, such as "
-                    "topography/bathymetry, vegetation, and land use."),
-    'url': "https://rda.ucar.edu",
-    'datasets_url': "https://rda.ucar.edu/datasets",
-    'email': "rdahelp@ucar.edu",
+                    "at NSF NCAR, contains a large collection of "
+                    "meteorological, atmospheric composition, and "
+                    "oceanographic observations, and operational and "
+                    "reanalysis model outputs, integrated with NSF NCAR High "
+                    "Performance Compute services to support atmospheric and "
+                    "geosciences research."),
+    'url': "https://gdex.ucar.edu",
+    'datasets_url': "https://gdex.ucar.edu/datasets",
+    'email': "datahelp@ucar.edu",
 }
 
 DOI_DOMAIN = "https://doi.org"
