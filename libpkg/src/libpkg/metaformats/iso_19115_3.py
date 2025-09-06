@@ -161,7 +161,7 @@ def add_alt_metadata_ref(root, nsmap):
             etree.SubElement(ci_online, "{" + nsmap['cit'] + "}linkage"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
                     os.path.join(settings.ARCHIVE['url'],
-                                 "cgi-bin/oai?verb=Identify"))
+                                 "/oai?verb=Identify"))
     etree.SubElement(
             etree.SubElement(ci_online, "{" + nsmap['cit'] + "}protocol"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
@@ -189,7 +189,7 @@ def add_metadata_linkage(root, nsmap, dsid):
             etree.SubElement(ci_online, "{" + nsmap['cit'] + "}linkage"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
                     os.path.join(settings.ARCHIVE['url'],
-                                 ("cgi-bin/oai?verb=GetRecord&identifier="
+                                 ("/oai?verb=GetRecord&identifier="
                                   "oai:edu.ucar.rda:" + dsid +
                                   "&metadataPrefix=iso19115-3")))
     etree.SubElement(
