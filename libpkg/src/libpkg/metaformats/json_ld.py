@@ -1,4 +1,5 @@
 import json
+import os
 import psycopg2
 
 from . import settings
@@ -27,9 +28,10 @@ def export(dsid, metadb_settings, **kwargs):
         summary = convert_html_to_text(
                 "<summary>" + res[1].replace("&amp;", "&") + "</summary>")
         if res[3] is not None and len(res[3]) > 0:
-            id = "{}/{}".format(settings.DOI_DOMAIN, res[3])
+            id = os.path.join(settings.DOI_DOMAIN, res[3])
         else:
-            id = "{}/{}/".format(settings.ARCHIVE['datasets_url'], dsid)
+            id = os.path.join("https://", settings.ARCHIVE['domain'],
+                              settings.ARCHIVE['datasets_path'], dsid)
 
         jsonld_data = {
             '@context': "http://schema.org",

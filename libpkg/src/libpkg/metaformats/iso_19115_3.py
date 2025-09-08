@@ -27,13 +27,15 @@ def add_metadata_identifier(root, nsmap, dsid):
                     "{" + nsmap['cit'] + "}title"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
                     settings.ARCHIVE['name'])
+    parts = settings.ARCHIVE['domain'].split(".")
+    parts.reverse()
     etree.SubElement(
             etree.SubElement(md_ident, "{" + nsmap['mcc'] + "}code"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
-                    "edu.ucar.rda::" + dsid)
+                    ".".join(parts) + "::" + dsid)
     etree.SubElement(
             etree.SubElement(md_ident, "{" + nsmap['mcc'] + "}codeSpace"),
-            "{" + nsmap['gco'] + "}CharacterString").text = "edu.ucar.rda"
+            "{" + nsmap['gco'] + "}CharacterString").text = ".".join(parts)
 
 
 def add_contact(root, nsmap):
@@ -78,15 +80,14 @@ def add_contact(root, nsmap):
                     etree.SubElement(ci_contact,
                                      "{" + nsmap['cit'] + "}onlineResource"),
                     "{" + nsmap['cit'] + "}CI_OnlineResource"))
+    linkage = os.path.join("https://", settings.ARCHIVE['domain'])
     etree.SubElement(
             etree.SubElement(ci_online, "{" + nsmap['cit'] + "}linkage"),
-            "{" + nsmap['gco'] + "}CharacterString").text = (
-                    settings.ARCHIVE['url'])
+            "{" + nsmap['gco'] + "}CharacterString").text = linkage
     etree.SubElement(
             etree.SubElement(ci_online, "{" + nsmap['cit'] + "}protocol"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
-                    settings.ARCHIVE['url'][
-                            0:settings.ARCHIVE['url'].find(":")])
+                    linkage[0:linkage.find(":")])
     etree.SubElement(
             etree.SubElement(ci_online, "{" + nsmap['cit'] + "}name"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
@@ -157,16 +158,15 @@ def add_alt_metadata_ref(root, nsmap):
                     etree.SubElement(ci_citation,
                                      "{" + nsmap['cit'] + "}onlineResource"),
                     "{" + nsmap['cit'] + "}CI_OnlineResource"))
+    oai_base = os.path.join("https://", settings.ARCHIVE['domain'])
     etree.SubElement(
             etree.SubElement(ci_online, "{" + nsmap['cit'] + "}linkage"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
-                    os.path.join(settings.ARCHIVE['url'],
-                                 "/oai?verb=Identify"))
+                    os.path.join(oai_base, "oai/?verb=Identify"))
     etree.SubElement(
             etree.SubElement(ci_online, "{" + nsmap['cit'] + "}protocol"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
-                    settings.ARCHIVE['url'][
-                            0:settings.ARCHIVE['url'].find(":")])
+                    oai_base[0:oai_base.find(":")])
     etree.SubElement(
             etree.SubElement(ci_online, "{" + nsmap['cit'] + "}name"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
@@ -185,18 +185,20 @@ def add_metadata_linkage(root, nsmap, dsid):
                     etree.SubElement(root,
                                      "{" + nsmap['mdb'] + "}metadataLinkage"),
                     "{" + nsmap['cit'] + "}CI_OnlineResource"))
+    parts = settings.ARCHIVE['domain'].split(".")
+    parts.reverse()
+    oai_base = os.path.join("https://", settings.ARCHIVE['domain'])
     etree.SubElement(
             etree.SubElement(ci_online, "{" + nsmap['cit'] + "}linkage"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
-                    os.path.join(settings.ARCHIVE['url'],
-                                 ("/oai?verb=GetRecord&identifier="
-                                  "oai:edu.ucar.rda:" + dsid +
+                    os.path.join(oai_base,
+                                 ("oai/?verb=GetRecord&identifier="
+                                  "oai:" + ".".join(parts) + ":" + dsid +
                                   "&metadataPrefix=iso19115-3")))
     etree.SubElement(
             etree.SubElement(ci_online, "{" + nsmap['cit'] + "}protocol"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
-                    settings.ARCHIVE['url'][
-                            0:settings.ARCHIVE['url'].find(":")])
+                    oai_base[0:oai_base.find(":")])
     etree.SubElement(
             etree.SubElement(ci_online, "{" + nsmap['cit'] + "}name"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
@@ -380,8 +382,8 @@ def add_graphic_overview(root, nsmap, graphic):
     etree.SubElement(
             etree.SubElement(md_graphic, "{" + nsmap['mcc'] + "}fileName"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
-                    os.path.join(settings.ARCHIVE['url'], "images/ds_logos",
-                                 graphic))
+                    os.path.join("https://", settings.ARCHIVE['domain'],
+                                 "images/ds_logos", graphic))
     etree.SubElement(
             etree.SubElement(
                     md_graphic, "{" + nsmap['mcc'] + "}fileDescription"),
@@ -791,7 +793,7 @@ def add_distribution_info(root, nsmap, dsid):
             etree.SubElement(
                     ci_address,
                     "{" + nsmap['cit'] + "}electronicMailAddress"),
-            "{" + nsmap['gco'] + "}CharacterString").text = "rdahelp@ucar.edu"
+            "{" + nsmap['gco'] + "}CharacterString").text = "datahelp@ucar.edu"
     ci_online = (
             etree.SubElement(
                     etree.SubElement(
@@ -807,7 +809,8 @@ def add_distribution_info(root, nsmap, dsid):
     etree.SubElement(
             etree.SubElement(ci_online, "{" + nsmap['cit'] + "}linkage"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
-                    os.path.join(settings.ARCHIVE['url'], "datasets", "dsid"))
+                    os.path.join("https://", settings.ARCHIVE['domain'],
+                                 "datasets", "dsid", ""))
     etree.SubElement(
             etree.SubElement(ci_online, "{" + nsmap['cit'] + "}protocol"),
             "{" + nsmap['gco'] + "}CharacterString").text = "https"

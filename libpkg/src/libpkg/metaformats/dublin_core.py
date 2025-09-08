@@ -25,7 +25,8 @@ def export_html_meta(dsid, metadb_settings):
         if doi is not None and len(doi[0]) > 0:
             identifier = "https://doi.org/" + doi[0]
         else:
-            identifier = "https://rda.ucar.edu/datasets/" + dsid
+            identifier = ("https://" + settings.ARCHIVE['domain'] + "/" +
+                          settings.ARCHIVE['datasets_path'] + "/" + dsid)
 
         meta_tags.append(
                 '<meta name="DC.identifier" content="' + identifier + '"/>')
@@ -195,14 +196,16 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
         if doi is not None:
             identifier.text = "DOI:" + doi[0]
         else:
-            identifier.text = "edu.ucar.rda:" + dsid
+            parts = settings.ARCHIVE['domain'].split(".")
+            parts.reverse()
+            identifier.text = ".".join(parts) + ":" + dsid
 
         etree.SubElement(root, dc_ns + "language").text = "english"
         dslist = xml_root.findall("./relatedDataset")
         if len(dslist) > 0:
             for ds in dslist:
                 etree.SubElement(root, dc_ns + "relation").text = (
-                        "rda.ucar.edu:" + ds.get("ID"))
+                        settings.ARCHIVE['domain'] + ":" + ds.get("ID"))
 
         rsrclst = xml_root.findall("./relatedResource")
         if len(rsrclst) > 0:

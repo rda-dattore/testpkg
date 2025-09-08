@@ -294,7 +294,9 @@ def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
     try:
         dc_data = {
             'alternateIdentifiers': [
-                {'identifier': "https://rda.ucar.edu/datasets/" + dsid,
+                {'identifier': ("https://" + settings.ARCHIVE['domain'] + "/" +
+                                settings.ARCHIVE['datasets_path'] + "/" +
+                                dsid),
                  'identifierType': "URL"},
                 {'identifier': dsid,
                  'identifierType': "Local"}],

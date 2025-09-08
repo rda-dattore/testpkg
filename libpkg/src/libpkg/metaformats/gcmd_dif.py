@@ -42,7 +42,9 @@ def export(dsid, metadb_settings, wagtaildb_settings):
         if doi is not None:
             entry_id.text = "DOI:" + doi[0]
         else:
-            entry_id.text = "edu.ucar.rda:" + dsid
+            parts = settings.ARCHIVE['domain'].split(".")
+            parts.reverse()
+            entry_id.text = ".".join(parts) + ":" + dsid
 
         mcursor.execute((
                 "select title, summary, continuing_update from search."
@@ -83,7 +85,8 @@ def export(dsid, metadb_settings, wagtaildb_settings):
         etree.SubElement(ds_citation, "Dataset_Publisher").text = (
                 publisher_keyword)
         etree.SubElement(ds_citation, "Online_Resource").text = (
-                os.path.join(settings.ARCHIVE['datasets_url'], dsid))
+                os.path.join("https://", settings.ARCHIVE['domain'],
+                             settings.ARCHIVE['datasets_path'], dsid))
         personnel = etree.SubElement(root, "Personnel")
         etree.SubElement(personnel, "Role").text = "Technical Contact"
         etree.SubElement(personnel, "Email").text = (
@@ -155,8 +158,6 @@ def export(dsid, metadb_settings, wagtaildb_settings):
         else:
             dsprog.text = "Complete"
 
-
-
         mcursor.execute((
                 "select distinct g.path from (select keyword from search."
                 "projects_new where dsid = %(dsid)s and vocabulary = 'GCMD' "
@@ -206,14 +207,13 @@ def export(dsid, metadb_settings, wagtaildb_settings):
                 etree.SubElement(root, "Distribution"),
                 "Distribution_Size").text = get_dataset_size(dsid, mcursor)
 
-
-
         etree.SubElement(root, "Summary").text = summary
         dslst = xml_root.findall("./relatedDataset")
         for ds in dslst:
             etree.SubElement(
                     etree.SubElement(root, "Related_URL"), "URL").text = (
-                    os.path.join(settings.ARCHIVE['datasets_url'],
+                    os.path.join("https://", settings.ARCHIVE['domain'],
+                                 settings.ARCHIVE['datasets_path'],
                                  ds.get("ID"), ""))
 
         rsrclst = xml_root.findall("./relatedResource")

@@ -12,8 +12,8 @@ ARCHIVE = {
                     "reanalysis model outputs, integrated with NSF NCAR High "
                     "Performance Compute services to support atmospheric and "
                     "geosciences research."),
-    'url': "https://gdex.ucar.edu",
-    'datasets_url': "https://gdex.ucar.edu/datasets",
+    'domain': "gdex.ucar.edu",
+    'datasets_path': "datasets",
     'email': "datahelp@ucar.edu",
 }
 

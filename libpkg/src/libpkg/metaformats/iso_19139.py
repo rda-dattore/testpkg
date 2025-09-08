@@ -1,3 +1,4 @@
+import os
 import psycopg2
 
 from datetime import datetime, timedelta
@@ -26,10 +27,12 @@ def metadata_date(dsid, d1, cursor):
 
 
 def add_file_identifier(root, nsmap, dsid):
+    parts = settings.ARCHIVE['domain']
+    parts.reverse()
     etree.SubElement(
             etree.SubElement(root, "{" + nsmap['gmd'] + "}fileIdentifier"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
-            "edu.ucar.rda::" + dsid)
+            ".".join(parts) + "::" + dsid)
 
 
 def add_language(root, nsmap):
@@ -81,7 +84,8 @@ def add_contact(root, nsmap):
     etree.SubElement(
             etree.SubElement(
                     ci_onlineresource, "{" + nsmap['gmd'] + "}linkage"),
-            "{" + nsmap['gmd'] + "}URL").text = settings.ARCHIVE['url']
+            "{" + nsmap['gmd'] + "}URL").text = (
+                    os.path.join("https://", settings.ARCHIVE['domain']))
     etree.SubElement(
             etree.SubElement(
                     ci_onlineresource, "{" + nsmap['gmd'] + "}name"),
@@ -133,9 +137,10 @@ def add_dataset_uri(root, nsmap, dsid, cursor):
                     "= 'A'"), (dsid, ))
     res = cursor.fetchone()
     if res is not None:
-        ds_uri = "/".join([settings.DOI_DOMAIN, res[0]])
+        ds_uri = os.path.join(settings.DOI_DOMAIN, res[0])
     else:
-        ds_uri = "/".join([settings.ARCHIVE['datasets_url'], res[0]])
+        ds_uri = os.path.join("https://", settings.ARCHIVE['domain'],
+                              settings.ARCHIVE['datasets_path'], res[0])
 
     etree.SubElement(
             etree.SubElement(root, "{" + nsmap['gmd'] + "}dataSetURI"),
@@ -383,7 +388,8 @@ def add_di_graphic_overview(root, nsmap, logo):
             etree.SubElement(
                     md_browsegraphic, "{" + nsmap['gmd'] + "}fileName"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
-            settings.ARCHIVE['url'] + "/images/ds_logos/" + logo.text)
+                    os.path.join("https://", settings.ARCHIVE['domain'],
+                                 "images/ds_logos", logo.text))
     etree.SubElement(
             etree.SubElement(
                     md_browsegraphic, "{" + nsmap['gmd'] + "}fileDesription"),
@@ -830,7 +836,8 @@ def add_distribution_info(root, nsmap, dsid, size):
     etree.SubElement(
             etree.SubElement(
                     ci_onlineresource, "{" + nsmap['gmd'] + "}linkage"),
-            "{" + nsmap['gmd'] + "}URL").text = settings.ARCHIVE['url']
+            "{" + nsmap['gmd'] + "}URL").text = (
+                    os.path.join("https://", settings.ARCHIVE['domain']))
     etree.SubElement(
             etree.SubElement(
                     ci_responsibleparty, "{" + nsmap['gmd'] + "}role"),
@@ -853,7 +860,8 @@ def add_distribution_info(root, nsmap, dsid, size):
                     md_digitaltransferoptions,
                     "{" + nsmap['gmd'] + "}onlineResource"),
             "{" + nsmap['gmd'] + "}CI_OnlineResource")
-    durl = settings.ARCHIVE['datasets_url']
+    durl = os.path.join("https://", settings.ARCHIVE['domain'],
+                        settings.ARCHIVE['datasets_path'])
     etree.SubElement(
             etree.SubElement(
                     ci_onlineresource, "{" + nsmap['gmd'] + "}linkage"),

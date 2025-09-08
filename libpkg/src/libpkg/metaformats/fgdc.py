@@ -84,7 +84,8 @@ def export(dsid, metadb_settings, wagtaildb_settings):
         if doi is not None:
             onlink.text = os.path.join(settings.DOI_DOMAIN, doi[0])
         else:
-            onlink.text = os.path.join(settings.ARCHIVE['datasets_url'], dsid)
+            onlink.text = os.path.join("https://", settings.ARCHIVE['domain'],
+                                       settings.ARCHIVE['datasets_path'], dsid)
 
         descript = etree.SubElement(idinfo, "descript")
         etree.SubElement(descript, "abstract").text = summary
