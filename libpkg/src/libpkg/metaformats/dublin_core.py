@@ -197,8 +197,7 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
             identifier.text = "DOI:" + doi[0]
         else:
             parts = settings.ARCHIVE['domain'].split(".")
-            parts.reverse()
-            identifier.text = ".".join(parts) + ":" + dsid
+            identifier.text = ".".join(reversed(parts)) + ":" + dsid
 
         etree.SubElement(root, dc_ns + "language").text = "english"
         dslist = xml_root.findall("./relatedDataset")

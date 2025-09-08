@@ -28,11 +28,10 @@ def metadata_date(dsid, d1, cursor):
 
 def add_file_identifier(root, nsmap, dsid):
     parts = settings.ARCHIVE['domain']
-    parts.reverse()
     etree.SubElement(
             etree.SubElement(root, "{" + nsmap['gmd'] + "}fileIdentifier"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
-            ".".join(parts) + "::" + dsid)
+            ".".join(reversed(parts)) + "::" + dsid)
 
 
 def add_language(root, nsmap):

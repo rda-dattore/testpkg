@@ -43,8 +43,7 @@ def export(dsid, metadb_settings, wagtaildb_settings):
             entry_id.text = "DOI:" + doi[0]
         else:
             parts = settings.ARCHIVE['domain'].split(".")
-            parts.reverse()
-            entry_id.text = ".".join(parts) + ":" + dsid
+            entry_id.text = ".".join(reversed(parts)) + ":" + dsid
 
         mcursor.execute((
                 "select title, summary, continuing_update from search."
