@@ -784,11 +784,12 @@ def add_gridded_coverage(dsid, cursor, wconn):
         res = cursor.fetchone()
         domain = spatial_domain_from_grid_definition(
                 res, centerOn="primeMeridian")
-        min_west = min(domain['wlon'], min_west)
-        max_east = max(domain['elon'], max_east)
-        min_south = min(domain['slat'], min_south)
-        max_north = max(domain['nlat'], max_north)
-        gdefs.append(res)
+        if not all(e is None for e in domain.values()):
+            min_west = min(domain['wlon'], min_west)
+            max_east = max(domain['elon'], max_east)
+            min_south = min(domain['slat'], min_south)
+            max_north = max(domain['nlat'], max_north)
+            gdefs.append(res)
 
     scov = {}
     scov['west'] = str(round(abs(min_west), 3))
