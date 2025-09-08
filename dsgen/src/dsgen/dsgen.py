@@ -782,10 +782,8 @@ def add_gridded_coverage(dsid, cursor, wconn):
                 'select definition, def_params from "WGrML".grid_definitions '
                 'where code = %s'), (val, ))
         res = cursor.fetchone()
-        print(res)
         domain = spatial_domain_from_grid_definition(
                 res, centerOn="primeMeridian")
-        print(dsid + " " + str(domain))
         min_west = min(domain['wlon'], min_west)
         max_east = max(domain['elon'], max_east)
         min_south = min(domain['slat'], min_south)
