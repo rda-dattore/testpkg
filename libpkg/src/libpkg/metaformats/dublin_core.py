@@ -202,9 +202,11 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
         etree.SubElement(root, dc_ns + "language").text = "english"
         dslist = xml_root.findall("./relatedDataset")
         if len(dslist) > 0:
+            dparts = settings.ARCHIVE['domain'].split(".")
+            dparts.reverse()
             for ds in dslist:
                 etree.SubElement(root, dc_ns + "relation").text = (
-                        settings.ARCHIVE['domain'] + ":" + ds.get("ID"))
+                        "oai:" + ".".join(dparts) + ":" + ds.get("ID"))
 
         rsrclst = xml_root.findall("./relatedResource")
         if len(rsrclst) > 0:
