@@ -201,7 +201,7 @@ def spatial_domain_from_grid_definition(gdef, **kwargs):
                 domain['wlon'] = end_elon
                 domain['elon'] = start_elon
 
-        elif 'centerOn' in kwargs and kwargs['centerOn'] == "primeMeridianl":
+        elif 'centerOn' in kwargs and kwargs['centerOn'] == "primeMeridian":
             if scans_east:
                 domain['wlon'] = ((start_elon - 360.) if start_elon >= 180.
                                   else start_elon)
