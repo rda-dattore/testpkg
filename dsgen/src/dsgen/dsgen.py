@@ -784,6 +784,7 @@ def add_gridded_coverage(dsid, cursor, wconn):
         res = cursor.fetchone()
         domain = spatial_domain_from_grid_definition(
                 res, centerOn="primeMeridian")
+        print(dsid + " " + str(domain))
         if not all(e is None for e in domain.values()):
             min_west = min(domain['wlon'], min_west)
             max_east = max(domain['elon'], max_east)
