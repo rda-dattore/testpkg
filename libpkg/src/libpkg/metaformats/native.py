@@ -5,14 +5,27 @@ from lxml import etree
 from ..metautils import get_date_from_precision, open_dataset_overview
 
 
-def convert_gcmd_uuids(xml_root, element, concept, cursor):
+def convert_gcmd_uuids(dsid, xml_root, element, concept, cursor, table):
     els = xml_root.findall("./" + element + "[@vocabulary='GCMD']")
-    for el in els:
-        cursor.execute(
-                "select path from search.gcmd_" + concept + " where uuid = %s",
-                (el.text, ))
-        path = cursor.fetchone()
-        el.text = path[0]
+    if len(els) > 0:
+        anchor = etree.Element("ANCHOR")
+        els[0].addprevious(anchor)
+
+        for el in els:
+            xml_root.remove(el)
+
+        cursor.execute((
+                "select c.path, t.keyword, '" + table + "' from search." +
+                table + " as t left join search.gcmd_" + concept + " as c on "
+                "c.uuid = t.keyword where t.dsid = %s and t.vocabulary = "
+                "'GCMD'"), (dsid, ))
+        res = cursor.fetchall()
+        for e in res:
+            new_e = etree.Element(element, vocabulary="GCMD")
+            new_e.text = e[0]
+            anchor.addprevious(new_e)
+
+        xml_root.remove(anchor)
 
 
 def export(dsid, metadb_settings):
@@ -55,11 +68,16 @@ def export(dsid, metadb_settings):
                 author.text = author.get("name")
                 author.attrib.pop("name")
 
-        convert_gcmd_uuids(xml_root, "variable", "sciencekeywords", cursor)
-        convert_gcmd_uuids(xml_root, "platform", "platforms", cursor)
-        convert_gcmd_uuids(xml_root, "project", "projects", cursor)
-        convert_gcmd_uuids(xml_root, "supportsProject", "projects", cursor)
-        convert_gcmd_uuids(xml_root, "instrument", "instruments", cursor)
+        convert_gcmd_uuids(dsid, xml_root, "variable", "sciencekeywords",
+                           cursor, "variables")
+        convert_gcmd_uuids(dsid, xml_root, "platform", "platforms", cursor,
+                           "platforms_new")
+        convert_gcmd_uuids(dsid, xml_root, "project", "projects", cursor,
+                           "projects_new")
+        convert_gcmd_uuids(dsid, xml_root, "supportsProject", "projects",
+                           cursor, "projects_new")
+        convert_gcmd_uuids(dsid, xml_root, "instrument", "instruments", cursor,
+                           "instruments")
         lst = xml_root.findall("./relatedDataset")
         for el in lst:
             id = el.get("ID")
