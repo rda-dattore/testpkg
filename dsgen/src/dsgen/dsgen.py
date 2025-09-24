@@ -20,6 +20,11 @@ from libpkg.metautils import get_date_from_precision, open_dataset_overview
 from .utils import name_to_initial, unicode_escape, update_wagtail
 
 
+WEB_DOMAIN = "https://gdex.ucar.edu"
+DATASETS_URL = os.path.join(WEB_DOMAIN, "datasets")
+METADATA_URL = os.path.join(WEB_DOMAIN, "metadata")
+
+
 def write_meta_and_jsonld(dsid, metadb_config, wagtaildb_config):
     dc_meta = dublin_core.export(
             dsid, metadb_config, wagtaildb_config,
@@ -92,8 +97,7 @@ def get_data_volume(dsid, cursor):
 
 def add_variable_table(dsid, format, list):
     response = requests.get(
-            os.path.join("https://rda.ucar.edu/datasets", dsid, "metadata",
-                         format + ".html"))
+            os.path.join(DATASETS_URL, dsid, "metadata", format + ".html"))
     appended = False
     if response.status_code == 200:
         list.append({'format': format.upper(),
@@ -101,8 +105,7 @@ def add_variable_table(dsid, format, list):
         appended = True
 
     response = requests.get(
-            os.path.join("https://rda.ucar.edu/datasets", dsid, "metadata",
-                         format + ".xml"))
+            os.path.join(DATASETS_URL, dsid, "metadata", format + ".xml"))
     if response.status_code == 200:
         if not appended:
             list.append({'format': format.upper()})
@@ -748,8 +751,8 @@ def add_format_urls(formats):
         return []
 
     data_formats = []
-    response = requests.get(
-            "https://rda.ucar.edu/metadata/FormatReferences.xml")
+    response = requests.get(os.path.join(METADATA_URL,
+                                         "FormatReferences.xml"))
     if response.status_code == 200:
         froot = etree.fromstring(response.content)
         for format in formats:
@@ -869,8 +872,8 @@ def check_for_auto_content_metadata(dsid, mconn, wconn):
                     add_gridded_coverage(dsid, cursor, wconn)
                     d = {'list': []}
                     response = requests.head(
-                            os.path.join("https://rda.ucar.edu/datasets",
-                                         dsid, "metadata/grib2_levels.html"))
+                            os.path.join(DATASETS_URL, dsid,
+                                         "metadata/grib2_levels.html"))
                     if response.status_code == 200:
                         d['grib2'] = True
 
