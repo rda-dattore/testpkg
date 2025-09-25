@@ -175,7 +175,7 @@ def export(dsid, metadb_settings, wagtaildb_settings):
                 etree.SubElement(project, "Short_Name").text = path
 
         wcursor.execute((
-                "select access_restrict from wagtail."
+                "select access_restrict from wagtail2."
                 "dataset_description_datasetdescriptionpage where dsid = %s"),
                 (dsid, ))
         access = wcursor.fetchone()
@@ -184,7 +184,7 @@ def export(dsid, metadb_settings, wagtaildb_settings):
                     convert_html_to_text("<access>" + access[0] + "</access>"))
 
         wcursor.execute((
-                "select usage_restrict from wagtail."
+                "select usage_restrict from wagtail2."
                 "dataset_description_datasetdescriptionpage where dsid = %s"),
                 (dsid, ))
         usage = wcursor.fetchone()

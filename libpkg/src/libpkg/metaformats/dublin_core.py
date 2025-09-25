@@ -215,7 +215,7 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
                         rsrc.text + " [" + rsrc.get("url") + "]")
 
         wcursor.execute((
-                "select access_restrict from wagtail."
+                "select access_restrict from wagtail2."
                 "dataset_description_datasetdescriptionpage where dsid = "
                 "%s"), (dsid, ))
         access = wcursor.fetchone()
@@ -225,7 +225,7 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
                                          "</access>"))
 
         wcursor.execute((
-                "select usage_restrict from wagtail."
+                "select usage_restrict from wagtail2."
                 "dataset_description_datasetdescriptionpage where dsid = "
                 "%s"), (dsid, ))
         usage = wcursor.fetchone()

@@ -135,7 +135,7 @@ def export(dsid, metadb_settings, wagtaildb_settings):
 
         accconst = etree.SubElement(idinfo, "accconst")
         wcursor.execute((
-                "select access_restrict from wagtail."
+                "select access_restrict from wagtail2."
                 "dataset_description_datasetdescriptionpage where dsid = %s"),
                 (dsid, ))
         acc = wcursor.fetchone()
@@ -147,7 +147,7 @@ def export(dsid, metadb_settings, wagtaildb_settings):
 
         useconst = etree.SubElement(idinfo, "useconst")
         wcursor.execute((
-                "select usage_restrict from wagtail."
+                "select usage_restrict from wagtail2."
                 "dataset_description_datasetdescriptionpage where dsid = %s"),
                 (dsid, ))
         use = wcursor.fetchone()

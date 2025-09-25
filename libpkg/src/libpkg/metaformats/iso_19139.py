@@ -487,14 +487,14 @@ def add_di_resource_constraints(root, nsmap, dsid, cursor):
             etree.SubElement(
                     root, "{" + nsmap['gmd'] + "}resourceConstraints"),
             "{" + nsmap['gmd'] + "}MD_LegalConstraints")
-    cursor.execute(("select usage_restrict from wagtail."
+    cursor.execute(("select usage_restrict from wagtail2."
                     "dataset_description_datasetdescriptionpage where "
                     "dsid = %s"), (dsid, ))
     usage = cursor.fetchone()
     if usage is not None and len(usage[0]) > 0:
         usage = convert_html_to_text("<usage>" + usage[0] + "</usage>")
     else:
-        cursor.execute(("select data_license from wagtail."
+        cursor.execute(("select data_license from wagtail2."
                         "dataset_description_datasetdescriptionpage "
                         "where dsid = %s"), (dsid, ))
         usage = cursor.fetchone()[0]['name']
@@ -504,7 +504,7 @@ def add_di_resource_constraints(root, nsmap, dsid, cursor):
                     md_legalconstraints,
                     "{" + nsmap['gmd'] + "}useLimitation"),
             "{" + nsmap['gco'] + "}CharacterString").text = usage
-    cursor.execute(("select access_restrict from wagtail."
+    cursor.execute(("select access_restrict from wagtail2."
                     "dataset_description_datasetdescriptionpage "
                     "where dsid = %s"), (dsid, ))
     access = cursor.fetchone()

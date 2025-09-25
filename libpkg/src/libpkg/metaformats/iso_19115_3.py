@@ -346,7 +346,7 @@ def add_references(root, nsmap):
 
 def add_maint_frequency(root, nsmap, cursor, dsid):
     cursor.execute((
-            "select update_freq from wagtail."
+            "select update_freq from wagtail2."
             "dataset_description_datasetdescriptionpage where dsid = %s"),
             (dsid, ))
     freq, = cursor.fetchone()
@@ -510,7 +510,7 @@ def add_constraints(root, nsmap, cursor, dsid):
                     etree.SubElement(
                             root, "{" + nsmap['mri'] + "}resourceConstraints"),
                     "{" + nsmap['mco'] + "}MD_LegalConstraints"))
-    cursor.execute(("select access_restrict from wagtail."
+    cursor.execute(("select access_restrict from wagtail2."
                     "dataset_description_datasetdescriptionpage "
                     "where dsid = %s"), (dsid, ))
     access = cursor.fetchone()
@@ -531,7 +531,7 @@ def add_constraints(root, nsmap, cursor, dsid):
             codeList=("http://standards.iso.org/iso/19115/resources/Codelists/"
                       "cat/codelists.xml#MD_RestrictionCode"),
             codeListValue=code).text = code
-    cursor.execute(("select usage_restrict from wagtail."
+    cursor.execute(("select usage_restrict from wagtail2."
                     "dataset_description_datasetdescriptionpage "
                     "where dsid = %s"), (dsid, ))
     usage = cursor.fetchone()
@@ -554,7 +554,7 @@ def add_constraints(root, nsmap, cursor, dsid):
 
 def add_associated_resources(root, nsmap, cursor, dsid):
     cursor.execute((
-            "select related_rsrc_list from wagtail."
+            "select related_rsrc_list from wagtail2."
             "dataset_description_datasetdescriptionpage where dsid = %s"),
             (dsid, ))
     rsrcs = cursor.fetchone()
@@ -729,7 +729,7 @@ def add_data_identification(root, nsmap, mcursor, wcursor, dsid):
         add_maint_frequency(data_ident, nsmap, wcursor, dsid)
 
     wcursor.execute((
-            "select dslogo from wagtail."
+            "select dslogo from wagtail2."
             "dataset_description_datasetdescriptionpage where dsid = %s"),
             (dsid, ))
     logo = wcursor.fetchone()

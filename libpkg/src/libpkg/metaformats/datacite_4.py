@@ -484,7 +484,7 @@ def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
                                .format(err))
 
         wagtaildb_cursor.execute((
-                "select url, name from wagtail.home_datalicense where id = "
+                "select url, name from wagtail2.home_datalicense where id = "
                 "%s"), (license_id, ))
         res = wagtaildb_cursor.fetchone()
         dc_data['rightsList'] = [{
