@@ -90,7 +90,7 @@ def get_data_volume(dsid, cursor):
                 e[2] if (e[1] is None or len(e[1]) == 0) else e[1])
 
     if len(groups) > 0:
-        data_volume['groups'] = groups
+        data_volume['groups'] = sorted(groups, key=lambda x: x['group'])
 
     return data_volume
 
