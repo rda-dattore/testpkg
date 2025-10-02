@@ -27,7 +27,7 @@ def metadata_date(dsid, d1, cursor):
 
 
 def add_file_identifier(root, nsmap, dsid):
-    parts = settings.ARCHIVE['domain']
+    parts = settings.ARCHIVE['domain'].split(".")
     etree.SubElement(
             etree.SubElement(root, "{" + nsmap['gmd'] + "}fileIdentifier"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
