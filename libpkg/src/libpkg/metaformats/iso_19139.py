@@ -139,7 +139,7 @@ def add_dataset_uri(root, nsmap, dsid, cursor):
         ds_uri = os.path.join(settings.DOI_DOMAIN, res[0])
     else:
         ds_uri = os.path.join("https://", settings.ARCHIVE['domain'],
-                              settings.ARCHIVE['datasets_path'], res[0])
+                              settings.ARCHIVE['datasets_path'], dsid)
 
     etree.SubElement(
             etree.SubElement(root, "{" + nsmap['gmd'] + "}dataSetURI"),
