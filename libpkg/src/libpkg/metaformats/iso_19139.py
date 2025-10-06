@@ -590,8 +590,8 @@ def get_di_temporal_extent(dsid, cursor):
     if idx > 0:
         tz = tz[0:idx]
 
-    return (True, get_date_from_precision(res[0], res[1], tz),
-            get_date_from_precision(res[2], res[3], tz))
+    return (True, get_date_from_precision(res[0], res[1], tz, time="iso8601"),
+            get_date_from_precision(res[2], res[3], tz, time="iso8601"))
 
 
 def add_di_extent(root, nsmap, dsid, geoext, tempext):
