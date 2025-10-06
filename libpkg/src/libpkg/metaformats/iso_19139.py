@@ -397,7 +397,7 @@ def add_di_graphic_overview(root, nsmap, logo):
                                  "images/ds_logos", logo.text))
     etree.SubElement(
             etree.SubElement(
-                    md_browsegraphic, "{" + nsmap['gmd'] + "}fileDesription"),
+                    md_browsegraphic, "{" + nsmap['gmd'] + "}fileDescription"),
             "{" + nsmap['gco'] + "}CharacterString").text = (
             "Logo thumbnail from URL")
     etree.SubElement(
