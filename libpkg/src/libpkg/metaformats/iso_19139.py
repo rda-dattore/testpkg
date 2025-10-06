@@ -896,7 +896,7 @@ def add_distribution_info(root, nsmap, dsid, size):
     ci_onlineresource = etree.SubElement(
             etree.SubElement(
                     md_digitaltransferoptions,
-                    "{" + nsmap['gmd'] + "}onlineResource"),
+                    "{" + nsmap['gmd'] + "}onLine"),
             "{" + nsmap['gmd'] + "}CI_OnlineResource")
     etree.SubElement(
             etree.SubElement(
