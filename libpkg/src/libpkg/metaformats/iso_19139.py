@@ -576,7 +576,7 @@ def get_di_temporal_extent(dsid, cursor):
                     "= %s and date_start < '9998-01-01' and date_end < "
                     "'9998-01-01'"), (dsid, ))
     res = cursor.fetchone()
-    if res is None:
+    if res is None or not all(res):
         return (False, None, None)
 
     tz = res[4]
