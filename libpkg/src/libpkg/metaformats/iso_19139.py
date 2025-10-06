@@ -147,17 +147,17 @@ def add_dataset_uri(root, nsmap, dsid, cursor):
 
 
 def add_related_resources(root, nsmap, related_resources):
-    ci_onlineresource = etree.SubElement(
-            etree.SubElement(
-                    etree.SubElement(
-                            etree.SubElement(
-                                    root, ("{" + nsmap['gmd'] +
-                                           "}metadataExtensionInfo")),
-                            ("{" + nsmap['gmd'] +
-                             "}MD_MetadataExtensionInformation")),
-                    "{" + nsmap['gmd'] + "}extensionOnLineResource"),
-            "{" + nsmap['gmd'] + "}CI_OnlineResource")
     for x in range(0, len(related_resources)):
+        ci_onlineresource = etree.SubElement(
+                etree.SubElement(
+                        etree.SubElement(
+                                etree.SubElement(
+                                        root, ("{" + nsmap['gmd'] +
+                                               "}metadataExtensionInfo")),
+                                ("{" + nsmap['gmd'] +
+                                 "}MD_MetadataExtensionInformation")),
+                        "{" + nsmap['gmd'] + "}extensionOnLineResource"),
+                "{" + nsmap['gmd'] + "}CI_OnlineResource")
         url = related_resources[x].get("url")
         etree.SubElement(
                 etree.SubElement(
