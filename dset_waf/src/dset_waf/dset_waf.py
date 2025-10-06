@@ -65,7 +65,7 @@ def do_push(args):
         mconn.commit()
         wconn = psycopg2.connect(**wdb_config)
         wcursor = wconn.cursor()
-        failed_validation_list = set()
+        failed_validation_set = set()
         for dsid in push_list:
             iso_rec = iso_19139.export(dsid, mdb_config, wdb_config)
             # validate the ISO record
@@ -76,14 +76,15 @@ def do_push(args):
                 xml_schema.assertValid(root)
             except Exception as err:
                 print("Error: {} failed to validate: '{}'".format(dsid, err))
-                failed_validation_list.add(dsid)
+                failed_validation_set.add(dsid)
 
-        if len(failed_validation_list) > 0:
+        if len(failed_validation_set) > 0:
+            print("REMOVING..." + str(len(failed_validation_set)))
             push_list = [e for e in push_list if e not in
-                         failed_validation_list]
+                         failed_validation_set]
 
-        print(push_list)
-        print(failed_validation_list)
+        print(str(push_list) + " " + str(len(push_list)))
+        print(str(failed_validation_set) + " " + str(len(failed_validation_set)))
     except Exception as err:
         print("Database connection error '{}'".format(err))
     finally:
