@@ -14,7 +14,7 @@ def open_dataset_overview(dsid):
     return etree.fromstring(resp.text, parser=parser)
 
 
-def get_date_from_precision(dt, precision, tz):
+def get_date_from_precision(dt, precision, tz, **kwargs):
     parts = dt.split()
     if precision > 3:
         tparts = parts[1].split(":")
@@ -22,7 +22,10 @@ def get_date_from_precision(dt, precision, tz):
         while len(tparts) > precision:
             del tparts[-1]
 
-        return parts[0] + "T" + ":".join(tparts) + tz[0:3] + ":" + tz[3:]
+        if 'time' in kwargs and kwargs['time'] == "iso8601":
+            return parts[0] + "T" + "".join(tparts) + tz[0:3]
+        else:
+            return parts[0] + "T" + ":".join(tparts) + tz[0:3] + ":" + tz[3:]
     else:
         dparts = parts[0].split("-")
         while len(dparts) > precision:
