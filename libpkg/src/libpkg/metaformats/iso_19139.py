@@ -207,6 +207,12 @@ def add_di_citation(root, nsmap, nil_reason, dsid, authors, cursor, title,
         etree.SubElement(ci_date, "{" + nsmap['gmd'] + "}date",
                          {nil_reason: "unknown"}, nsmap=nsmap)
 
+    etree.SubElement(
+            etree.SubElement(ci_date, "{" + nsmap['gmd'] + "}dateType"),
+            "{" + nsmap['gmd'] + "}CI_DateTypeCode",
+            codeList=("http://www.isotc211.org/2005/resources/Codelist/"
+                      "gmxCodelists.xml#CI_DateTypeCode"),
+            codeListValue="publication").text = "publication"
     author_list = []
     for author in authors:
         auth_type = author.get("{" + nsmap['xsi'] + "}type")
