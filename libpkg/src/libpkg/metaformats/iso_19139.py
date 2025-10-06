@@ -863,7 +863,7 @@ def add_distribution_info(root, nsmap, dsid, size):
     ci_onlineresource = etree.SubElement(
             etree.SubElement(
                     md_digitaltransferoptions,
-                    "{" + nsmap['gmd'] + "}online"),
+                    "{" + nsmap['gmd'] + "}onLine"),
             "{" + nsmap['gmd'] + "}CI_OnlineResource")
     durl = os.path.join("https://", settings.ARCHIVE['domain'],
                         settings.ARCHIVE['datasets_path'])
