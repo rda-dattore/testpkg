@@ -65,18 +65,25 @@ def do_push(args):
         mconn.commit()
         wconn = psycopg2.connect(**wdb_config)
         wcursor = wconn.cursor()
+        failed_validation_list = set()
         for dsid in push_list:
-            print(dsid)
             iso_rec = iso_19139.export(dsid, mdb_config, wdb_config)
             # validate the ISO record
             root = etree.fromstring(iso_rec).find(".")
-            print("ROOT=" + str(root))
-            xml_schema_doc = etree.parse("/data/dset_waf/schemas/iso/iso19139.xsd")
-            print("XML_SCHEMA_DOC=" + str(xml_schema_doc))
-            #xml_schema = etree.XMLSchema("/data/dset_waf/schemas/iso/iso19139.xsd")
-            #print("XML_SCHEMA=" + str(xml_schema))
-            sys.exit(1)
+            xml_schema = etree.XMLSchema(
+                    etree.parse("/data/dset_waf/schemas/iso/iso19139.xsd"))
+            try:
+                xml_schema.assertValid(root)
+            except Exception as err:
+                print("Error: {} failed to validate: '{}'".format(dsid, err))
+                failed_validation_list.add(dsid)
 
+        if len(failed_validation_list) > 0:
+            push_list = [e for e in push_list if e not in
+                         failed_validation_list]
+
+        print(push_list)
+        print(failed_validation_list)
     except Exception as err:
         print("Database connection error '{}'".format(err))
     finally:
