@@ -83,7 +83,7 @@ def do_push(args):
             current_utc_datetime = (datetime.now(timezone.utc)
                                     .strftime("%Y-%m-%dT%H:%M:%SZ"))
             iso_rec = (iso_rec[0:date_time_index+14] + "" +
-                       current_utc_datetime + iso_rec[date_time_index+33:])
+                       current_utc_datetime + iso_rec[date_time_index+34:])
             print(iso_rec)
             # validate the ISO record
             root = etree.fromstring(iso_rec).find(".")
