@@ -72,13 +72,13 @@ def do_push(args):
 
         wconn = psycopg2.connect(**wdb_config)
         wcursor = wconn.cursor()
+        xml_schema = etree.XMLSchema(
+                etree.parse("/data/dset_waf/schemas/iso/iso19139.xsd"))
         failed_validation_set = set()
         for dsid in push_list:
             iso_rec = iso_19139.export(dsid, mdb_config, wdb_config)
             # validate the ISO record
             root = etree.fromstring(iso_rec).find(".")
-            xml_schema = etree.XMLSchema(
-                    etree.parse("/data/dset_waf/schemas/iso/iso19139.xsd"))
             try:
                 xml_schema.assertValid(root)
             except Exception as err:
