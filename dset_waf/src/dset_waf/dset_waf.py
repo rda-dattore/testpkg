@@ -118,10 +118,9 @@ def do_push(args):
                     sys.exit(1)
 
             for dsid in push_list:
-                waf_name = "waf-" + dsid + ".xml"
                 shutil.copyfile(
-                        os.path.join(LOCAL_WAF, waf_name),
-                        os.path.join(repo_path, waf_name))
+                        os.path.join(LOCAL_WAF, "waf-" + dsid + ".xml"),
+                        os.path.join(repo_path, dsid + ".xml"))
                 o = subprocess.run(
                         "git -C " + repo_path + " add " + dsid + ".xml",
                         shell=True, capture_output=True)
