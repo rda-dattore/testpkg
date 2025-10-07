@@ -116,6 +116,45 @@ def do_push(args):
                           .format(err, uflag))
                     sys.exit(1)
 
+            for dsid in push_list:
+                o = subprocess.run(
+                        "git -C " + repo_path + " add " + dsid + ".xml",
+                        shell=True, capture_output=True)
+                err = o.stderr.decode("utf-8")
+                if len(err) > 0:
+                    print(("git add error for {}: '{}'; uflag was '{}'")
+                          .format(err, dsid, uflag))
+                    sys.exit(1)
+
+            o = subprocess.run(
+                    "git -C " + repo_path + " commit -m 'auto update' -a",
+                    shell=True, capture_output=True)
+            err = o.stderr.decode("utf-8")
+            if len(err) > 0:
+                print(("git commit error: '{}'; uflag was '{}'")
+                      .format(err, uflag))
+                sys.exit(1)
+
+            o = subprocess.run("git -C " + repo_path + " push -q", shell=True,
+                               capture_output=True)
+            err = o.stderr.decode("utf-8")
+            if len(err) > 0 and err.find("remote: Resolving deltas") != 0:
+                print(("git push error: '{}'; uflag was '{}'")
+                      .format(err, uflag))
+                sys.exit(1)
+
+            err = ""
+            while len(err) == 0:
+                o = subprocess.run(
+                        "git -C " + repo_path + " stash drop 'stash@{0}'",
+                        shell=True, capture_output=True)
+                err = o.stderr.decode("utf-8")
+
+        if len(uflag) > 0:
+            mcursor.execute("delete from metautil.dset_waf where uflag = %s",
+                            (uflag, ))
+            mconn.commit()
+
     except Exception as err:
         print("An error occurred: '{}'".format(err))
     finally:
