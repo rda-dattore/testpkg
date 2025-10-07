@@ -62,7 +62,7 @@ def do_push(args):
             print("No matching datasets found.")
             sys.exit(1)
 
-        if arg[0] == "queued-only":
+        if args[0] == "queued-only":
             uflag = strand(10)
             mcursor.execute("update metautil.dset_waf set uflag = %s",
                             (uflag, ))
