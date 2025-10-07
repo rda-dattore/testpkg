@@ -62,6 +62,7 @@ def do_push(args):
             print("No matching datasets found.")
             sys.exit(1)
 
+        uflag = ""
         if args[0] == "queued-only":
             uflag = strand(10)
             mcursor.execute("update metautil.dset_waf set uflag = %s",
@@ -103,7 +104,7 @@ def do_push(args):
                     sys.exit(1)
 
     except Exception as err:
-        print("Database connection error '{}'".format(err))
+        print("An error occurred: '{}'".format(err))
     finally:
         if 'mconn' in locals():
             mconn.close()
