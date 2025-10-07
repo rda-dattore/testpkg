@@ -1,5 +1,7 @@
 import json
+import os
 import psycopg2
+import subprocess
 import sys
 
 from libpkg.metaformats import iso_19139
@@ -79,12 +81,24 @@ def do_push(args):
                 failed_validation_set.add(dsid)
 
         if len(failed_validation_set) > 0:
-            print("REMOVING..." + str(len(failed_validation_set)))
             push_list = [e for e in push_list if e not in
                          failed_validation_set]
 
-        print(str(push_list) + " " + str(len(push_list)))
-        print(str(failed_validation_set) + " " + str(len(failed_validation_set)))
+        for repo in GIT_REPOS:
+            repo_path = os.path.join(REPO_HEAD, repo)
+            o = subprocess.run((
+                    "git -C " + repo_path + " stash; git -C " + repo_path +
+                    " pull -q"), shell=True, capture_output=True)
+            err = o.stderr.decode("utf-8")
+            if len(err) > 0:
+                if o.returncode == 0:
+                    print(("git pull message: '{}'; uflag was '{}'")
+                          .format(err, uflag))
+                else:
+                    print(("git pull error: '{}'; uflag was '{}'")
+                          .format(err, uflag))
+                    sys.exit(1)
+
     except Exception as err:
         print("Database connection error '{}'".format(err))
     finally:
