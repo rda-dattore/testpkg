@@ -9,7 +9,8 @@ from libpkg.strutils import strand
 from lxml import etree
 
 
-REPO_HEAD = "/data/dset_waf/git-repos"
+LOCAL_WAF = "/data/dset_waf"
+REPO_HEAD = os.path.join(LOCAL_WAF, "git-repos")
 
 GIT_REPOS = [
     "dset-web-accessible-folder-dev/rda",
@@ -102,6 +103,10 @@ def do_push(args):
                     print(("git pull error: '{}'; uflag was '{}'")
                           .format(err, uflag))
                     sys.exit(1)
+
+            added = False
+            for dsid in push_list:
+                waf_name = os.path.join(LOCAL_WAF, "waf-" + dsid + ".xml")
 
     except Exception as err:
         print("An error occurred: '{}'".format(err))
