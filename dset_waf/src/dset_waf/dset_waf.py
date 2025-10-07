@@ -4,6 +4,7 @@ import psycopg2
 import subprocess
 import sys
 
+from datetime import datetime, timezone
 from libpkg.metaformats import iso_19139
 from libpkg.strutils import strand
 from lxml import etree
@@ -77,6 +78,13 @@ def do_push(args):
         failed_validation_set = set()
         for dsid in push_list:
             iso_rec = iso_19139.export(dsid, mdb_config, wdb_config)
+            date_stamp_index = iso_rec.find("<gmd:dateStamp>")
+            date_time_index = iso_rec.find("<gco:DateTime>", date_stamp_index)
+            current_utc_datetime = (datetime.now(timezone.utc)
+                                    .strftime("%Y-%m-%dT%H:%M:%SZ"))
+            iso_rec = (iso_rec[0:date_time_index+14] + "" +
+                       current_utc_datetime + iso_rec[date_time_index+33:])
+            print(iso_rec)
             # validate the ISO record
             root = etree.fromstring(iso_rec).find(".")
             try:
