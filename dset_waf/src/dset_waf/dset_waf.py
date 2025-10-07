@@ -89,6 +89,10 @@ def do_push(args):
             root = etree.fromstring(iso_rec).find(".")
             try:
                 xml_schema.assertValid(root)
+                waf_name = os.path.join(LOCAL_WAF, "waf-" + dsid + ".xml")
+                with open(waf_name, "w") as f:
+                    f.write(iso_rec)
+
             except Exception as err:
                 print("Error: {} failed to validate: '{}'".format(dsid, err))
                 failed_validation_set.add(dsid)
@@ -111,10 +115,6 @@ def do_push(args):
                     print(("git pull error: '{}'; uflag was '{}'")
                           .format(err, uflag))
                     sys.exit(1)
-
-            added = False
-            for dsid in push_list:
-                waf_name = os.path.join(LOCAL_WAF, "waf-" + dsid + ".xml")
 
     except Exception as err:
         print("An error occurred: '{}'".format(err))
