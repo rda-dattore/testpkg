@@ -314,6 +314,11 @@ def add_di_abstract(root, nsmap, abstract):
 
 
 def add_di_status(root, nsmap, progress):
+    if progress == "Y":
+        progress = "onGoing"
+    else:
+        progress = "completed"
+
     etree.SubElement(
             etree.SubElement(root, "{" + nsmap['gmd'] + "}status"),
             "{" + nsmap['gmd'] + "}MD_ProgressCode",
