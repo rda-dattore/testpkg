@@ -78,28 +78,39 @@ def do_push(args):
                 etree.parse("/data/dset_waf/schemas/iso/iso19139.xsd"))
         failed_validation_set = set()
         for dsid in push_list:
-            iso_rec = iso_19139.export(dsid, mdb_config, wdb_config)
-            date_stamp_index = iso_rec.find("<gmd:dateStamp>")
-            date_time_index = iso_rec.find("<gco:DateTime>", date_stamp_index)
-            current_utc_datetime = (datetime.now(timezone.utc)
-                                    .strftime("%Y-%m-%dT%H:%M:%SZ"))
-            iso_rec = (iso_rec[0:date_time_index+14] + "" +
-                       current_utc_datetime + iso_rec[date_time_index+34:])
-            # validate the ISO record
-            root = etree.fromstring(iso_rec).find(".")
             try:
+                iso_rec = iso_19139.export(dsid, mdb_config, wdb_config)
+                date_stamp_index = iso_rec.find("<gmd:dateStamp>")
+                date_time_index = iso_rec.find("<gco:DateTime>",
+                                               date_stamp_index)
+                current_utc_datetime = (datetime.now(timezone.utc)
+                                        .strftime("%Y-%m-%dT%H:%M:%SZ"))
+                iso_rec = (iso_rec[0:date_time_index+14] + "" +
+                           current_utc_datetime + iso_rec[date_time_index+34:])
+                # validate the ISO record
+                root = etree.fromstring(iso_rec).find(".")
                 xml_schema.assertValid(root)
                 waf_name = os.path.join(LOCAL_WAF, "waf-" + dsid + ".xml")
                 with open(waf_name, "w") as f:
                     f.write(iso_rec)
 
             except Exception as err:
-                print("Error: {} failed to validate: '{}'".format(dsid, err))
+                print("Warning: {} failed to validate: '{}'".format(dsid, err))
                 failed_validation_set.add(dsid)
 
         if len(failed_validation_set) > 0:
             push_list = [e for e in push_list if e not in
                          failed_validation_set]
+            for dsid in failed_validation_set:
+                try:
+                    mcursor.execute((
+                            "update metautil.dset_waf set uflag = '' where "
+                            "dsid = %s"), (dsid, ))
+                    mconn.commit()
+                except Exception as err:
+                    print((
+                            "Warning: unable to reset uflag for '{}': error: "
+                            "'{}'").format(dsid, err))
 
         for repo in GIT_REPOS:
             repo_path = os.path.join(REPO_HEAD, repo)
