@@ -11,7 +11,7 @@ def ll_from_polar_gridpoint(gridpoint_dict, grid_dict):
 
     grid_dict is a dictionary of grid information:
         'ni' and 'nj': the number of gridpoints in the i and j directions
-        'proj': projection of the grid - either "S" or "N"
+        'projection': projection of the grid - either "S" or "N"
         'tan_lat': tangent latitude
         'dx': x-distance between two points in kilometers at 'tan_lat'
         'orient_elon': longitude of orientation in degrees (0. to 360.)
@@ -21,7 +21,7 @@ def ll_from_polar_gridpoint(gridpoint_dict, grid_dict):
             gridpoint in geo space
     """
     x = gridpoint_dict['i'] + 1. - (grid_dict['ni'] + 1.) / 2.
-    if grid_dict['proj'] == "S":
+    if grid_dict['projection'] == "S":
         x = -x
 
     y = gridpoint_dict['j'] + 1. - (grid_dict['nj'] + 1.) / 2.
@@ -38,7 +38,7 @@ def ll_from_polar_gridpoint(gridpoint_dict, grid_dict):
                 math.degrees(math.atan2(y, x)) + 90. -
                 (360. - grid_dict['orient_elon']))
 
-    if grid_dict['proj'] == "S":
+    if grid_dict['projection'] == "S":
         ll_dict['lat'] = -ll_dict['lat']
 
     while ll_dict['elon'] < 0.:
