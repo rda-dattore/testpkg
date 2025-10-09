@@ -48,7 +48,7 @@ def do_push(args):
             if args[0] == "all":
                 mcursor.execute((
                         "select dsid from search.datasets where type in "
-                        "('P', 'H')"))
+                        "('P', 'H') and dsid < 'd999000'"))
             elif args[0] == "queued-only":
                 mcursor.execute((
                         "select w.dsid from metautil.dset_waf as w left join "
