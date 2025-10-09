@@ -146,12 +146,14 @@ def spatial_domain_from_grid_definition(gdef, **kwargs):
             xspace = (end_elon - start_elon) / xres
         else:
             xspace -= 1.
-            if xspace == 0. and def_params[6] == "nan":
+            if xspace == 0.:
+                # zonal or global mean
                 xspace = end_elon - start_elon
                 if xspace == 0.:
-                    xspace = end_elon + start_elon
-
-                xres = 1.
+                    xspace = 1.
+                    xres = 0.
+                else:
+                    xres = 1.
 
         if (abs((end_elon - start_elon) / xspace - xres) < 0.01):
             scans_east = True
