@@ -76,6 +76,15 @@ def add_contact(root, nsmap):
             etree.SubElement(
                     ci_responsibleparty, "{" + nsmap['gmd'] + "}contactInfo"),
             "{" + nsmap['gmd'] + "}CI_Contact")
+    etree.SubElement(
+            etree.SubElement(
+                    etree.SubElement(
+                            etree.SubElement(ci_contact,
+                                             "{" + nsmap['gmd'] + "}address"),
+                            "{" + nsmap['gmd'] + "}CI_Address"),
+                    "{" + nsmap['gmd'] + "}electronicMailAddress"),
+            "{" + nsmap['gco'] + "}CharacterString").text = (
+            settings.ARCHIVE['email'])
     ci_onlineresource = etree.SubElement(
             etree.SubElement(
                     ci_contact, "{" + nsmap['gmd'] + "}onlineResource"),
