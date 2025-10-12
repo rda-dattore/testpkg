@@ -82,27 +82,28 @@ def fill_spatial_domain_from_polar_stereographic_grid(def_params):
         yoverx = math.tan(math.radians(start_elon + 270. - orient_elon))
         if def_params[6] == "S":
             yoverx = -yoverx
-            pole_x = 1
-            deg_res = dx / (math.cos(math.radians(tan_lat)) * 111.1)
-            max_pole_x = int(360. / deg_res) + 1
-            pole_y = 0
-            while pole_x < max_pole_x:
-                ni = pole_x * 2 - 1
-                pole_y = round(1 - yoverx * (1 - pole_x))
-                nj = pole_y * 2 - 1
-                ll = ll_from_polar_gridpoint({'i': 0, 'j': 0},
-                                             {'ni': ni, 'nj': nj,
-                                              'projection': def_params[6],
-                                              'tan_lat': tan_lat, 'dx': dx,
-                                              'orient_elon': orient_elon})
-                if (abs(ll['lat'] - start_lat) < 0.5 and
-                        abs(ll['elon'] - start_elon) < 0.5):
-                    break
 
-                pole_x += 1
+        pole_x = 1
+        deg_res = dx / (math.cos(math.radians(tan_lat)) * 111.1)
+        max_pole_x = int(360. / deg_res) + 1
+        pole_y = 0
+        while pole_x < max_pole_x:
+            ni = pole_x * 2 - 1
+            pole_y = round(1 - yoverx * (1 - pole_x))
+            nj = pole_y * 2 - 1
+            ll = ll_from_polar_gridpoint({'i': 0, 'j': 0},
+                                         {'ni': ni, 'nj': nj,
+                                          'projection': def_params[6],
+                                          'tan_lat': tan_lat, 'dx': dx,
+                                          'orient_elon': orient_elon})
+            if (abs(ll['lat'] - start_lat) < 0.5 and
+                    abs(ll['elon'] - start_elon) < 0.5):
+                break
 
-            if pole_x == max_pole_x:
-                return domain
+            pole_x += 1
+
+        if pole_x == max_pole_x:
+            return domain
 
     for j in range(0, nj):
         for i in range(0, ni):
