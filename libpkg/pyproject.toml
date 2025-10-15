@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "libpkg"
-version = "1.2.20"
+version = "1.2.21"
 authors = [
     {name = "Bob Dattore", email = "dattore@ucar.edu"},
 ]
