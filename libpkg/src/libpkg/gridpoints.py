@@ -31,7 +31,7 @@ def ll_from_polar_gridpoint(gridpoint_dict, grid_dict):
         ll_dict = {}
         r2 = (x * x) + (y * y)
         re2 = math.pow(
-                ((1. + math.sin(math.radians(grid_dict['tan_lat']))) *
+                ((1. + math.sin(math.radians(abs(grid_dict['tan_lat'])))) *
                  R_EARTH / (grid_dict['dx'] * 1000.)), 2.)
         ll_dict['lat'] = math.degrees(math.asin((re2 - r2) / (re2 + r2)))
         ll_dict['elon'] = (
