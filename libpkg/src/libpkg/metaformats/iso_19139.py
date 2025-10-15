@@ -612,7 +612,7 @@ def add_di_extent(root, nsmap, dsid, geoext, tempext):
     extents = {'point': False, 'box': False, 'location': False,
                'temporal': False}
     extents['temporal'], begin_date, end_date = tempext
-    if all(geoext.values()):
+    if not None in geoext.values():
         if 'wlon' in geoext:
             if (geoext['wlon'] == geoext['elon'] and geoext['slat'] ==
                     geoext['nlat']):
