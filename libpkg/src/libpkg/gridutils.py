@@ -117,7 +117,13 @@ def fill_spatial_domain_from_polar_stereographic_grid(def_params):
             domain['wlon'] = min(ll['elon'], domain['wlon'])
             domain['elon'] = max(ll['elon'], domain['elon'])
 
-    if domain['wlon'] == 0. and domain['elon'] > 359.9:
+    ll = ll_from_polar_gridpoint({'i': int(ni/2.), 'j': int(nj/2.)},
+                                 {'ni': ni, 'nj': nj,
+                                  'projection': def_params[6],
+                                  'tan_lat': tan_lat, 'dx': dx,
+                                  'orient_elon': orient_elon})
+    if ((ll['elon'] == 360. and abs(ll['lat']) == 90.) or
+            (domain['wlon'] == 0. and domain['elon'] > 359.9)):
         domain['wlon'] = -180.
         domain['elon'] = 180.
     else:
