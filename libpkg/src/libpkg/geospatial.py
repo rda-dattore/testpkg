@@ -13,7 +13,7 @@ def fill_geographic_extent_data(dsid, cursor):
         for e in res:
             domain = spatial_domain_from_grid_definition(
                     e, centerOn="primeMeridian")
-            if all(domain.values()):
+            if None not in domain.values():
                 geo_data['is_grid'] = True
                 geo_data['wlon'] = (
                         domain['wlon'] if geo_data['wlon'] is None else
