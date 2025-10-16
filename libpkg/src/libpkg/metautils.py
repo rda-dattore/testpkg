@@ -4,10 +4,13 @@ from lxml import etree
 
 
 def open_dataset_overview(dsid):
-    resp = requests.get("https://gdex.ucar.edu/datasets/" + dsid + "/native/")
+    resp = requests.get("http://localhost:8080/datasets/" + dsid + "/native/")
     if resp.status_code != 200:
-        raise RuntimeError(("unable to download dataset overview: status "
-                            "code: {}".format(resp.status_code)))
+        resp = requests.get("https://gdex.ucar.edu/datasets/" + dsid +
+                            "/native/")
+        if resp.status_code != 200:
+            raise RuntimeError(("unable to download dataset overview: status "
+                                "code: {}".format(resp.status_code)))
 
     parser = etree.XMLParser(remove_blank_text=True)
     return etree.fromstring(resp.text, parser=parser)
