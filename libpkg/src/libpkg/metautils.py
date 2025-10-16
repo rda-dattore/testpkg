@@ -4,8 +4,7 @@ from lxml import etree
 
 
 def open_dataset_overview(dsid):
-    resp = requests.get("https://gdex.k8s.ucar.edu/datasets/" + dsid +
-                        "/native/")
+    resp = requests.get("https://gdex.ucar.edu/datasets/" + dsid + "/native/")
     if resp.status_code != 200:
         raise RuntimeError(("unable to download dataset overview: status "
                             "code: {}".format(resp.status_code)))
