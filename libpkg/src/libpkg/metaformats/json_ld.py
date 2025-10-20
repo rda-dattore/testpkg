@@ -34,7 +34,10 @@ def export(dsid, metadb_settings, **kwargs):
                               settings.ARCHIVE['datasets_path'], dsid)
 
         jsonld_data = {
-            '@context': "http://schema.org",
+            '@context': {
+                '@language': "en",
+                '@vocab': "https://schema.org/",
+            },
             '@type': "Dataset",
             '@id': id,
             'name': res[0],
