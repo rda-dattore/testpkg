@@ -166,6 +166,12 @@ def export(dsid, metadb_settings, **kwargs):
 
             jsonld_data['spatialCoverage']['geo'] = d
 
+        license = xml_root.find("./license")
+        if license is not None:
+            jsonld_data['license'] = license
+        else:
+            raise RuntimeError("no data license could be identified")
+
     finally:
         conn.close()
 
