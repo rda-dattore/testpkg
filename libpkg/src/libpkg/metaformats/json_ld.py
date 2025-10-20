@@ -166,7 +166,7 @@ def export(dsid, metadb_settings, **kwargs):
 
             jsonld_data['spatialCoverage']['geo'] = d
 
-        license = xml_root.find("./license")
+        license = xml_root.find("./dataLicense")
         if license is not None:
             jsonld_data['license'] = license
         else:
