@@ -37,6 +37,10 @@ def export(dsid, metadb_settings, **kwargs):
             '@context': {
                 '@language': "en",
                 '@vocab': "https://schema.org/",
+                'sc': "https://schema.org/",
+                'cr': "http://mlcommons.org/croissant/",
+                'rai': "http://mlcommons.org/croissant/RAI/",
+                'dct': "http://purl.org/dc/terms/",
             },
             '@type': "Dataset",
             '@id': id,
