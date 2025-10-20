@@ -29,7 +29,7 @@ def write_meta_and_jsonld(dsid, metadb_config, wagtaildb_config):
     dc_meta = dublin_core.export(
             dsid, metadb_config, wagtaildb_config,
             output="html_meta")
-    jsonld = json_ld.export(dsid, metadb_config)
+    jsonld = json_ld.export(dsid, metadb_config, wagtaildb_config)
     with open(os.path.join("/data/web/jsonld", dsid + ".jsonld"), "w") as f:
         f.write(dc_meta + "\n")
         f.write('<script type="application/ld+json">\n')
