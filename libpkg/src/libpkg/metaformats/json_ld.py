@@ -176,7 +176,16 @@ def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
 
         license = xml_root.find("./dataLicense")
         if license is not None:
-            jsonld_data['license'] = license.text
+            wcursor.execute((
+                    "select url from wagtail2.home_datalicense where id = %s"),
+                    (license.text, ))
+            url = wcursor.fetchone()
+            if url is not None:
+                jsonld_data['license'] = url[0]
+            else:
+                raise RuntimeError(("the data license URL could not be "
+                                    "identified"))
+
         else:
             raise RuntimeError("no data license could be identified")
 
