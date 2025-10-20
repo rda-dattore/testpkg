@@ -20,9 +20,9 @@ from libpkg.metautils import get_date_from_precision, open_dataset_overview
 from .utils import name_to_initial, unicode_escape, update_wagtail
 
 
-WEB_DOMAIN = "https://gdex.ucar.edu"
-DATASETS_URL = os.path.join(WEB_DOMAIN, "datasets")
-METADATA_URL = os.path.join(WEB_DOMAIN, "metadata")
+HOST_NAME = "http://localhost:8080"
+DATASETS_URL = os.path.join(HOST_NAME, "datasets")
+METADATA_URL = os.path.join(HOST_NAME, "metadata")
 
 
 def write_meta_and_jsonld(dsid, metadb_config, wagtaildb_config):
