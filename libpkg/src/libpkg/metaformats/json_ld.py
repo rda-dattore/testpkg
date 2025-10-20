@@ -168,7 +168,7 @@ def export(dsid, metadb_settings, **kwargs):
 
         license = xml_root.find("./dataLicense")
         if license is not None:
-            jsonld_data['license'] = license.text()
+            jsonld_data['license'] = license.text
         else:
             raise RuntimeError("no data license could be identified")
 
