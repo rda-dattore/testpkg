@@ -8,20 +8,27 @@ from ..metautils import open_dataset_overview
 from ..xmlutils import convert_html_to_text
 
 
-def export(dsid, metadb_settings, **kwargs):
+def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
     try:
-        conn = psycopg2.connect(**metadb_settings)
-        cursor = conn.cursor()
+        mconn = psycopg2.connect(**metadb_settings)
+        mcursor = mconn.cursor()
     except psycopg2.Error as err:
         raise RuntimeError("metadata database connection error: '{}'"
                            .format(err))
 
     try:
-        cursor.execute(("select s.title, s.summary, s.pub_date, v.doi from "
-                        "search.datasets as s left join dssdb.dsvrsn as v on "
-                        "v.dsid = s.dsid where s.dsid = %s and v.end_date is "
-                        "null"), (dsid, ))
-        res = cursor.fetchone()
+        wconn = psycopg2.connect(**metadb_settings)
+        wcursor = wconn.cursor()
+    except psycopg2.Error as err:
+        raise RuntimeError("wagtail database connection error: '{}'"
+                           .format(err))
+
+    try:
+        mcursor.execute(("select s.title, s.summary, s.pub_date, v.doi from "
+                         "search.datasets as s left join dssdb.dsvrsn as v on "
+                         "v.dsid = s.dsid where s.dsid = %s and v.end_date is "
+                         "null"), (dsid, ))
+        res = mcursor.fetchone()
         if res is None:
             raise RuntimeError("dataset doesn't exist or could not be found")
 
@@ -74,11 +81,12 @@ def export(dsid, metadb_settings, **kwargs):
                 alst.append(d)
 
         else:
-            cursor.execute(("select g.path, c.contact from search."
-                            "contributors_new as c left join search."
-                            "gcmd_providers as g on g.uuid = c.keyword where "
-                            "c.dsid = %s and c.vocabulary = 'GCMD'"), (dsid, ))
-            res = cursor.fetchall()
+            mcursor.execute(("select g.path, c.contact from search."
+                             "contributors_new as c left join search."
+                             "gcmd_providers as g on g.uuid = c.keyword where "
+                             "c.dsid = %s and c.vocabulary = 'GCMD'"),
+                            (dsid, ))
+            res = mcursor.fetchall()
             for e in res:
                 name_parts = e[0].split(" > ")
                 if name_parts[-1] == "UNAFFILIATED INDIVIDUAL":
@@ -109,23 +117,23 @@ def export(dsid, metadb_settings, **kwargs):
         else:
             jsonld_data['author'].update(alst[0])
 
-        cursor.execute(("select g.path from search.variables as v left join "
-                        "search.gcmd_sciencekeywords as g on g.uuid = v."
-                        "keyword where v.dsid = %s and v.vocabulary = 'GCMD'"),
-                       (dsid, ))
-        res = cursor.fetchall()
+        mcursor.execute(("select g.path from search.variables as v left join "
+                         "search.gcmd_sciencekeywords as g on g.uuid = v."
+                         "keyword where v.dsid = %s and v.vocabulary = "
+                         "'GCMD'"), (dsid, ))
+        res = mcursor.fetchall()
         if len(res) > 0:
             if len(res) > 1:
                 jsonld_data['keywords'] = [e[0] for e in res]
             else:
                 jsonld_data['keywords'] = res[0][0]
 
-        cursor.execute(("select min(date_start), min(time_start), max("
-                        "date_end), max(time_end), min(start_flag), min("
-                        "time_zone) from dssdb.dsperiod where dsid = %s and "
-                        "date_start < '9998-01-01' and date_end < "
-                        "'9998-01-01' group by dsid"), (dsid, ))
-        res = cursor.fetchone()
+        mcursor.execute(("select min(date_start), min(time_start), max("
+                         "date_end), max(time_end), min(start_flag), min("
+                         "time_zone) from dssdb.dsperiod where dsid = %s and "
+                         "date_start < '9998-01-01' and date_end < "
+                         "'9998-01-01' group by dsid"), (dsid, ))
+        res = mcursor.fetchone()
         if res is not None:
             num_parts = int(res[4])
             sdate = str(res[0])
@@ -144,7 +152,7 @@ def export(dsid, metadb_settings, **kwargs):
 
             jsonld_data['temporalCoverage'] = sdate + "/" + edate
 
-        geoext = fill_geographic_extent_data(dsid, cursor)
+        geoext = fill_geographic_extent_data(dsid, mcursor)
         if all(geoext.values()):
             jsonld_data['spatialCoverage'] = {'@type': "Place"}
             if (geoext['wlon'] == geoext['elon'] and geoext['slat'] ==
@@ -173,7 +181,8 @@ def export(dsid, metadb_settings, **kwargs):
             raise RuntimeError("no data license could be identified")
 
     finally:
-        conn.close()
+        mconn.close()
+        wconn.close()
 
     indent = kwargs['indent'] if 'indent' in kwargs else None
     return json.dumps(jsonld_data, indent=indent)
