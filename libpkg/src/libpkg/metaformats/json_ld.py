@@ -17,7 +17,7 @@ def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
                            .format(err))
 
     try:
-        wconn = psycopg2.connect(**metadb_settings)
+        wconn = psycopg2.connect(**wagtaildb_settings)
         wcursor = wconn.cursor()
     except psycopg2.Error as err:
         raise RuntimeError("wagtail database connection error: '{}'"
