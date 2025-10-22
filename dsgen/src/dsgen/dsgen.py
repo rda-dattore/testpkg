@@ -250,7 +250,10 @@ def get_temporal(dsid, cursor):
 
             trng += " to " + item[1][1]
             if item[1][2] == "BCE":
-                trng += " BCE"
+                if item[1][1][0] == '-':
+                    trng += " BCE"
+                else:
+                    trng += " CE"
 
             temporal['full'] = trng
 
