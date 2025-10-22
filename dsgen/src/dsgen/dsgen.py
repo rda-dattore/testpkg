@@ -158,11 +158,12 @@ def get_temporal(dsid, cursor):
     res = cursor.fetchall()
     if len(res) == 0:
         cursor.execute((
-                "select date_start, time_start, start_flag, date_end, "
-                "time_end, end_flag, time_zone, NULL, NULL from dssdb."
-                "dsperiod where dsid = %s and (time_zone = 'BCE' or ("
-                "date_start between '0001-01-01' and '5000-01-01' and "
-                "date_end between '0001-01-01' and '5000-01-01'))"), (dsid, ))
+                "select cast(date_start as text), cast(time_start as text), "
+                "start_flag, cast(date_end as text), cast(time_end as text), "
+                "end_flag, time_zone, NULL, NULL from dssdb.dsperiod where "
+                "dsid = %s and (time_zone = 'BCE' or (date_start between "
+                "'0001-01-01' and '5000-01-01' and date_end between "
+                "'0001-01-01' and '5000-01-01'))"), (dsid, ))
         res = cursor.fetchall()
 
     if len(res) > 0:
@@ -196,14 +197,12 @@ def get_temporal(dsid, cursor):
         pds = {}
         for e in res:
             sdt = get_date_from_precision(
-                    " ".join([str(e[0]), str(e[1])]), e[2],
-                    e[6]).replace("T", " ")
+                    " ".join([e[0], e[1]]), e[2], e[6]).replace("T", " ")
             if sdt[-6:].replace(":", "") == e[6]:
                 sdt = " ".join([sdt[:-6], e[6]])
 
             edt = get_date_from_precision(
-                    " ".join([str(e[3]), str(e[4])]), e[5],
-                    e[6]).replace("T", " ")
+                    " ".join([e[3], e[4]]), e[5], e[6]).replace("T", " ")
             if edt[-6:].replace(":", "") == e[6]:
                 edt = " ".join([edt[:-6], e[6]])
 
