@@ -141,20 +141,22 @@ def get_variables(dsid, cursor):
 def get_temporal(dsid, cursor):
     temporal = {}
     cursor.execute((
-            "select p.date_start, p.time_start, p.start_flag, p.date_end, "
-            "p.time_end, p.end_flag, p.time_zone, g.title, g.grpid from dssdb"
+            "select cast(p.date_start as text), cast(p.time_start as text), "
+            "p.start_flag, cast(p.date_end as text), cast(p.time_end as "
+            "text), p.end_flag, p.time_zone, g.title, g.grpid from dssdb"
             ".dsperiod as p left join dssdb.dsgroup as g on (p.dsid = g.dsid "
             "and p.gindex = g.gindex) where p.dsid = %s and g.pindex = 0 and "
             "date_start > '0001-01-01' and date_start < '5000-01-01' and "
             "date_end > '0001-01-01' and date_end < '5000-01-01' union select "
-            "p.date_start, p.time_start, p.start_flag, p.date_end, p."
-            "time_end, p.end_flag, p.time_zone, g2.title, NULL from dssdb."
-            "dsperiod as p left join dssdb.dsgroup as g on (p.dsid = g.dsid "
-            "and p.gindex = g.gindex) left join dssdb.dsgroup as g2 on (p."
-            "dsid = g2.dsid and g.pindex = g2.gindex) where p.dsid = %s and "
-            "date_start > '0001-01-01' and date_start < '5000-01-01' and "
-            "date_end > '0001-01-01' and date_end < '5000-01-01' and g2.title "
-            "is not null order by title"), (dsid, dsid))
+            "cast(p.date_start as text), cast(p.time_start as text), p."
+            "start_flag, cast(p.date_end as text), cast(p.time_end as text), "
+            "p.end_flag, p.time_zone, g2.title, NULL from dssdb.dsperiod as p "
+            "left join dssdb.dsgroup as g on (p.dsid = g.dsid and p.gindex = "
+            "g.gindex) left join dssdb.dsgroup as g2 on (p.dsid = g2.dsid and "
+            "g.pindex = g2.gindex) where p.dsid = %s and date_start > "
+            "'0001-01-01' and date_start < '5000-01-01' and date_end > "
+            "'0001-01-01' and date_end < '5000-01-01' and g2.title is not "
+            "null order by title"), (dsid, dsid))
     res = cursor.fetchall()
     if len(res) == 0:
         cursor.execute((
