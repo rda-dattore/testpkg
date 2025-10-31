@@ -175,19 +175,20 @@ def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
             jsonld_data['spatialCoverage']['geo'] = d
 
         license = xml_root.find("./dataLicense")
-        if license is not None:
-            wcursor.execute((
-                    "select url from wagtail2.home_datalicense where id = %s"),
-                    (license.text, ))
-            url = wcursor.fetchone()
-            if url is not None:
-                jsonld_data['license'] = url[0]
-            else:
-                raise RuntimeError(("the data license URL could not be "
-                                    "identified"))
-
+        if license is None:
+            license = "CC-BY-4.0"
         else:
-            raise RuntimeError("no data license could be identified")
+            license = license.text
+
+        wcursor.execute((
+                "select url from wagtail2.home_datalicense where id = %s"),
+                (license, ))
+        url = wcursor.fetchone()
+        if url is not None:
+            jsonld_data['license'] = url[0]
+        else:
+            raise RuntimeError(("the data license URL could not be "
+                                "identified"))
 
     finally:
         mconn.close()
