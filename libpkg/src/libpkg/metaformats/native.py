@@ -38,6 +38,12 @@ def export(dsid, metadb_settings):
 
     try:
         xml_root = open_dataset_overview(dsid)
+        cursor.execute("select doi from dssdb.dsvrsn where dsid = %s",
+                       (dsid, ))
+        doi, = cursor.fetchone()
+        if doi is not None:
+            xml_root.set("DOI", doi)
+
         summary = xml_root.find("./summary")
         stext = etree.tostring(summary).decode("utf-8")
         idx = stext.find(">")
