@@ -4,8 +4,10 @@ from lxml import etree
 
 
 def open_dataset_overview(dsid):
-    resp = requests.get("http://localhost:8080/datasets/" + dsid + "/native/")
-    if resp.status_code != 200:
+    try:
+        resp = requests.get("http://localhost:8080/datasets/" + dsid +
+                            "/native/")
+    except:
         resp = requests.get("https://gdex.ucar.edu/datasets/" + dsid +
                             "/native/")
         if resp.status_code != 200:
