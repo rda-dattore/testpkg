@@ -21,7 +21,7 @@ def convert_gcmd_uuids(dsid, xml_root, element, concept, cursor, table):
                 "'GCMD'"), (dsid, ))
         res = cursor.fetchall()
         for e in res:
-            new_e = etree.Element(element, vocabulary="GCMD")
+            new_e = etree.Element(element, vocabulary="GCMD", uuid=e[1])
             new_e.text = e[0]
             anchor.addprevious(new_e)
 
