@@ -113,7 +113,7 @@ def add_metadata_date(root, nsmap, cursor, dsid):
            dsid))
     fdate, = cursor.fetchone() or (None, )
     if fdate is not None:
-        fdate = fdate[0] + timedelta(hours=6)
+        fdate += timedelta(hours=6)
         tstamp = str(max(fdate, tstamp))
 
     etree.SubElement(
