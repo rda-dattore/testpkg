@@ -74,6 +74,8 @@ def export(dsid, metadb_settings):
                 author.text = author.get("name")
                 author.attrib.pop("name")
 
+        convert_gcmd_uuids(dsid, xml_root, "contributor", "providers",
+                           cursor, "contributors_new")
         convert_gcmd_uuids(dsid, xml_root, "variable", "sciencekeywords",
                            cursor, "variables")
         convert_gcmd_uuids(dsid, xml_root, "platform", "platforms", cursor,
