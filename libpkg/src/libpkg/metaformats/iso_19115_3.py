@@ -111,7 +111,7 @@ def add_metadata_date(root, nsmap, cursor, dsid):
     cursor.execute((
            "select max(date_modified + time_modified) from dssdb.wfile_" +
            dsid))
-    fdate = cursor.fetchone()
+    fdate, = cursor.fetchone() or (None, )
     if fdate is not None:
         fdate = fdate[0] + timedelta(hours=6)
         tstamp = str(max(fdate, tstamp))
