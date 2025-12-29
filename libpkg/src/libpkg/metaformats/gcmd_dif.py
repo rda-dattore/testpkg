@@ -76,7 +76,7 @@ def export(dsid, metadb_settings, wagtaildb_settings):
                     "where c.dsid = %s and c.vocabulary = 'GCMD'"), (dsid, ))
             res = mcursor.fetchall()
             for contributor, in res:
-                creators.append[contributor]
+                creators.append(contributor)
 
         etree.SubElement(ds_citation, "Dataset_Creator").text = (
                 ", ".join(creators))
