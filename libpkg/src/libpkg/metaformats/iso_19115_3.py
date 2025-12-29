@@ -276,7 +276,8 @@ def add_extent(root, nsmap, cursor, dsid, geoext):
                     "start_flag), max(concat(date_end, ' ', time_end)), min("
                     "end_flag), min(time_zone) from dssdb.dsperiod where dsid "
                     "= %s and date_start < '9998-01-01' and date_end < "
-                    "'9998-01-01'"), (dsid, ))
+                    "'9998-01-01' having length(min(concat("
+                    "date_start, ' ', time_start))) > 0"), (dsid, ))
     res = cursor.fetchone()
     if res is not None:
         extents['temporal'] = True
