@@ -114,12 +114,12 @@ def add_metadata_date(root, nsmap, cursor, dsid):
     fdate, = cursor.fetchone() or (None, )
     if fdate is not None:
         fdate += timedelta(hours=6)
-        tstamp = str(max(fdate, tstamp))
+        tstamp = max(fdate, tstamp)
 
     etree.SubElement(
             etree.SubElement(ci_date, "{" + nsmap['cit'] + "}date"),
             "{" + nsmap['gco'] + "}DateTime").text = (
-                    tstamp.replace(" ", "T") + "+00:00")
+                    str(tstamp).replace(" ", "T") + "+00:00")
     etree.SubElement(
             etree.SubElement(ci_date, "{" + nsmap['cit'] + "}dateType"),
             "{" + nsmap['cit'] + "}CI_DateTypeCode",
