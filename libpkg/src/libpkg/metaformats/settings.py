@@ -17,7 +17,7 @@ ARCHIVE = {
     'email': "datahelp@ucar.edu",
 }
 
-DOI_DOMAIN = "https://doi.org"
+DOI_DOMAIN = "doi.org"
 
 GCMD = {
     'org_name': "NASA Global Change Master Directory",

@@ -35,7 +35,7 @@ def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
         summary = convert_html_to_text(
                 "<summary>" + res[1].replace("&amp;", "&") + "</summary>")
         if res[3] is not None and len(res[3]) > 0:
-            id = os.path.join(settings.DOI_DOMAIN, res[3])
+            id = os.path.join("https://", settings.DOI_DOMAIN, res[3])
         else:
             id = os.path.join("https://", settings.ARCHIVE['domain'],
                               settings.ARCHIVE['datasets_path'], dsid)

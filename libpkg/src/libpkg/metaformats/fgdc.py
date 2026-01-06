@@ -82,7 +82,7 @@ def export(dsid, metadb_settings, wagtaildb_settings):
                 "'A'"), (dsid, ))
         doi = mcursor.fetchone()
         if doi is not None:
-            onlink.text = os.path.join(settings.DOI_DOMAIN, doi[0])
+            onlink.text = os.path.join("https://", settings.DOI_DOMAIN, doi[0])
         else:
             onlink.text = os.path.join("https://", settings.ARCHIVE['domain'],
                                        settings.ARCHIVE['datasets_path'], dsid)

@@ -145,7 +145,7 @@ def add_dataset_uri(root, nsmap, dsid, cursor):
                     "= 'A'"), (dsid, ))
     res = cursor.fetchone()
     if res is not None:
-        ds_uri = os.path.join(settings.DOI_DOMAIN, res[0])
+        ds_uri = os.path.join("https://", settings.DOI_DOMAIN, res[0])
     else:
         ds_uri = os.path.join("https://", settings.ARCHIVE['domain'],
                               settings.ARCHIVE['datasets_path'], dsid)
