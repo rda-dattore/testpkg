@@ -38,7 +38,7 @@ def get_mandatory_fields(dsid, xml_root, cursor):
         mand['publisher']['schemeUri'] = "https://ror.org/"
         mand['publisher']['publisherIdentifier'] = (
                 settings.ARCHIVE['pub_name'][pkey]['ror'])
-        mand['publisher']['publisherIdentiferScheme'] = "ROR"
+        mand['publisher']['publisherIdentifierScheme'] = "ROR"
 
     mand['creators'] = []
     lst = xml_root.findall("./author")
