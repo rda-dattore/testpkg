@@ -80,7 +80,7 @@ def export_html_meta(dsid, metadb_settings):
                 '" scheme="DCTERMS.W3CDTF"/>'))
         meta_tags.append((
                 '<meta name="DC.publisher" content="' +
-                settings.ARCHIVE['pub_name']['default'] + '"/>'))
+                settings.ARCHIVE['pub_name']['default']['name'] + '"/>'))
         summary = convert_html_to_text("<summary>" + res[2] + "</summary>")
         meta_tags.append((
                 '<meta name="DC.description" content="' +
@@ -161,7 +161,7 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
                     contributor[0])
 
         etree.SubElement(root, dc_ns + "publisher").text = (
-                settings.ARCHIVE['pub_name']['default'])
+                settings.ARCHIVE['pub_name']['default']['name'])
         etree.SubElement(root, dc_ns + "date").text = (
                 "Published: " + str(pub_date))
         mcursor.execute((

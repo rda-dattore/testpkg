@@ -27,9 +27,9 @@ def get_mandatory_fields(dsid, xml_root, cursor):
     }
     if (mand['titles'][0]['title'][0:26].lower() ==
             "icarus chamber experiment:"):
-        mand['publisher'] = settings.ARCHIVE['pub_name']['icarus']
+        mand['publisher'] = settings.ARCHIVE['pub_name']['icarus']['name']
     else:
-        mand['publisher'] = settings.ARCHIVE['pub_name']['default']
+        mand['publisher'] = settings.ARCHIVE['pub_name']['default']['name']
 
     mand['creators'] = []
     lst = xml_root.findall("./author")

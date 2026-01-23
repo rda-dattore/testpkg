@@ -55,7 +55,7 @@ def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
             'description': summary,
             'publisher': {
                 '@type': "Organization",
-                'name': settings.ARCHIVE['pub_name']['default'],
+                'name': settings.ARCHIVE['pub_name']['default']['name'],
             },
             'datePublished': str(res[2]),
             'author': {},
