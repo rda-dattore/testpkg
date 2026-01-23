@@ -1,8 +1,12 @@
 ARCHIVE = {
     'name': "NSF NCAR Geoscience Data Exchange",
     'pub_name': {
-        'default': "NSF National Center for Atmospheric Research",
-        'icarus': "ICARUS Community",
+        'default': {
+            'name': "NSF National Center for Atmospheric Research",
+        },
+        'icarus': {
+            'name': "ICARUS Community",
+        },
     },
     'description': ("The Geoscience Data Exchange (GDEX), managed by the "
                     "Computational and Information Systems Laboratory (CISL) "
