@@ -120,7 +120,7 @@ def to_xml(dc_data, **kwargs):
     attr_qname = etree.QName(
             "http://www.w3.org/2001/XMLSchema-instance",
             "schemaLocation")
-    xsd = "http://schema.datacite.org/meta/kernel-4.4/metadata.xsd"
+    xsd = "http://schema.datacite.org/meta/kernel-4.6/metadata.xsd"
     root = etree.Element(
             "resource",
             {attr_qname: (
