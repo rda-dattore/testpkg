@@ -398,8 +398,8 @@ def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
                 "dssdb.dsvrsn where dsid = %s) as v on v.doi = c.doi_data "
                 "left join citation.works_authors as a on a.id = c.doi_work "
                 "left join citation.works as w on w.doi = c.doi_work where v."
-                "doi is not null group by c.doi_work, w.type having count(a."
-                "last_name) > 0"), (dsid, ))
+                "doi is not null and w.type is not null group by c.doi_work, "
+                "w.type having count(a.last_name) > 0"), (dsid, ))
         res = metadb_cursor.fetchall()
         dc_data['relatedIdentifiers'] = []
         for e in res:
