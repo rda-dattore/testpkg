@@ -23,13 +23,22 @@ def get_mandatory_fields(dsid, xml_root, cursor):
             'resourceTypeGeneral': "Dataset",
             'resourceType':
                 xml_root.find("./topic[@vocabulary='ISO']").text
-        }
+        },
+        'publisher': {
+        },
     }
     if (mand['titles'][0]['title'][0:26].lower() ==
             "icarus chamber experiment:"):
-        mand['publisher'] = settings.ARCHIVE['pub_name']['icarus']['name']
+        pkey = 'icarus'
     else:
-        mand['publisher'] = settings.ARCHIVE['pub_name']['default']['name']
+        pkey = 'default'
+
+    mand['publisher']['name'] = settings.ARCHIVE['pub_name'][pkey]['name']
+    if 'ror' in settings.ARCHIVE['pub_name'][pkey]:
+        mand['publisher']['schemeUri'] = "https://ror.org/"
+        mand['publisher']['publisherIdentifier'] = (
+                settings.ARCHIVE['pub_name'][pkey]['ror'])
+        mand['publisher']['publisherIdentiferScheme'] = "ROR"
 
     mand['creators'] = []
     lst = xml_root.findall("./author")
@@ -144,7 +153,15 @@ def to_xml(dc_data, **kwargs):
     etree.SubElement(
             etree.SubElement(root, "titles"),
             "title").text = dc_data['titles'][0]['title']
-    etree.SubElement(root, "publisher").text = dc_data['publisher']
+    sub_e = etree.SubElement(root, "publisher")
+    sub_e.text = dc_data['publisher']['name']
+    if ('publisherIdentifierScheme' in dc_data['publisher'] and
+            dc_data['publisher']['publisherIdentifierScheme'] == "ROR"):
+        sub_e.set("publisherIdentifier",
+                  dc_data['publisher']['publisherIdentifier'])
+        sub_e.set("publisherIdentifierScheme", "ROR")
+        sub_e.set("schemeURI", "https://ror.org/")
+
     etree.SubElement(root, "publicationYear").text = (
             dc_data['publicationYear'])
     etree.SubElement(
