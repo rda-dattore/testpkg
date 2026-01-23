@@ -3,6 +3,7 @@ ARCHIVE = {
     'pub_name': {
         'default': {
             'name': "NSF National Center for Atmospheric Research",
+            'ror': "https://ror.org/05cvfcr44",
         },
         'icarus': {
             'name': "ICARUS Community",
