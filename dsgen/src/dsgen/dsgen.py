@@ -1161,8 +1161,8 @@ def main():
         if type in ('P', 'H') and dsid < 'd999000':
             cursor.execute((
                     "insert into metautil.dset_waf (dsid, uflag) values "
-                    "(%s, '') on conflict on constraint (dsid, uflag) do "
-                    "update set uflag = excluded.uflag"), (dsid, ))
+                    "(%s, '') on conflict (dsid, uflag) do update set uflag = "
+                    "excluded.uflag"), (dsid, ))
             mconn.commit()
 
     finally:
