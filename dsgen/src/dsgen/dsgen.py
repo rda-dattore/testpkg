@@ -1085,6 +1085,8 @@ def print_usage(util_name, err):
         "--wdb=<dict>   <dict> is the wagtail database configuration "
         "dictionary\n"
         "\noptions:\n"
+        "--no-dset-waf  don't add the dataset to the queue for the DSET WAF"
+        "\n"
         "--no-jsonld    don't output <meta> tags and JSON-LD\n"
         "\n"
         "dnnnnnn        dataset ID"
@@ -1100,11 +1102,13 @@ def main():
             raise getopt.GetoptError("")
 
         opts, args = getopt.getopt(sys.argv[1:], "",
-                                   ["mdb=", "wdb=", "no-jsonld"])
+                                   ["mdb=", "wdb=", "no-jsonld",
+                                    "no-dset-waf"])
     except getopt.GetoptError as err:
         print_usage(util_name, err)
 
     write_jsonld = True
+    no_dset_waf = False
     for opt in opts:
         if opt[0] == "--mdb":
             try:
@@ -1120,6 +1124,8 @@ def main():
 
         elif opt[0] == "--no-jsonld":
             write_jsonld = False
+        elif opt[0] == "--no-dset-waf":
+            no_dset_waf = True
 
     errs = []
     if 'metadb_config' not in locals():
@@ -1158,12 +1164,12 @@ def main():
             add_detailed_variables(dsid, xml, wconn)
             add_vertical_levels(dsid, xml, wconn)
 
-        #if type in ('P', 'H') and dsid < 'd999000':
-        #    cursor.execute((
-        #            "insert into metautil.dset_waf (dsid, uflag) values "
-        #            "(%s, '') on conflict (dsid, uflag) do update set uflag = "
-        #            "excluded.uflag"), (dsid, ))
-        #    mconn.commit()
+        if not no_dset_waf and type in ('P', 'H') and dsid < 'd999000':
+            cursor.execute((
+                    "insert into metautil.dset_waf (dsid, uflag) values "
+                    "(%s, '') on conflict (dsid, uflag) do update set uflag = "
+                    "excluded.uflag"), (dsid, ))
+            mconn.commit()
 
     finally:
         try:
