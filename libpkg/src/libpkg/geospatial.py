@@ -35,7 +35,8 @@ def fill_geographic_extent_data(dsid, cursor):
                     uom = "degree"
                     dist = parts[6]
 
-                hres[dist + uom] = {'uom': uom, 'dist': dist}
+                if dist != "nan":
+                    hres[dist + uom] = {'uom': uom, 'dist': dist}
 
         geo_data.update({'hres': hres})
 
