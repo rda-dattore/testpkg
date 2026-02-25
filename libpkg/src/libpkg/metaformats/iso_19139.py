@@ -612,7 +612,7 @@ def add_di_extent(root, nsmap, dsid, geoext, tempext):
     extents = {'point': False, 'box': False, 'location': False,
                'temporal': False}
     extents['temporal'], begin_date, end_date = tempext
-    if not None in geoext.values():
+    if None not in geoext.values():
         if 'wlon' in geoext:
             if (geoext['wlon'] == geoext['elon'] and geoext['slat'] ==
                     geoext['nlat']):
@@ -698,7 +698,9 @@ def add_data_identification(root, nsmap, nil_reason, dsid, mcursor, wcursor,
     title, abstract, pub_date, progress = mcursor.fetchone()
     add_di_citation(md_dataidentification, nsmap, nil_reason, dsid,
                     xml_root.findall("./author"), mcursor, title, pub_date)
-    add_di_abstract(md_dataidentification, nsmap, abstract)
+    add_di_abstract(md_dataidentification, nsmap,
+                    convert_html_to_text((
+                            "<summary>" + abstract + "</summary>")))
     add_di_status(md_dataidentification, nsmap, progress)
     add_di_point_of_contact(md_dataidentification, nsmap)
     add_di_resource_maintenance(
