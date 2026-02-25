@@ -25,11 +25,19 @@ def decode_elongitude(lons):
 def fill_spatial_domain_from_lambert_conformal_grid(def_params):
     domain = {'slat': 99., 'nlat': -99., 'wlon': 999., 'elon': -999.}
     ni = int(def_params[0])
+    istep = 1
+    if ni > 2000:
+        istep = int(ni / 2000)
+
     nj = int(def_params[1])
-    for j in range(0, nj):
+    jstep = 1
+    if nj > 2000:
+        jstep = int(nj / 2000)
+
+    for j in range(0, nj, jstep):
         straddles_prime_meridian = False
         previous_elon = None
-        for i in range(0, ni):
+        for i in range(0, ni, istep):
             ll = ll_from_lambert_conformal_gridpoint(
                     {'i': i, 'j': j},
                     {'left_lat': decode_latitude(def_params[2]),
