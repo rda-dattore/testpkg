@@ -1166,10 +1166,9 @@ def main():
 
         if not no_dset_waf and type in ('P', 'H') and dsid < 'd999000':
             cursor.execute((
-                    "insert into metautil.dset_waf2 (dsid, uflag, "
-                    "reset_tstamp) values (%s, '', 'Y') on conflict (dsid, "
-                    "uflag) do update set uflag = excluded.uflag, "
-                    "reset_tstamp = excluded.reset_tstamp"), (dsid, ))
+                    "insert into metautil.dset_waf2 (dsid, uflag) values (%s, "
+                    "'') on conflict (dsid, uflag) do update set uflag = "
+                    "excluded.uflag"), (dsid, ))
             mconn.commit()
 
     finally:
