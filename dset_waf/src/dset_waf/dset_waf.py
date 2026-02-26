@@ -60,7 +60,7 @@ def do_push(args):
                 sys.exit(1)
 
             res = mcursor.fetchall()
-            push_list = [(e[0], e[1]) for e in res]
+            push_list = [e for e in res]
 
         if len(push_list) == 0:
             print("No matching datasets found.")
@@ -103,7 +103,7 @@ def do_push(args):
                 failed_validation_set.add(dsid)
 
         if len(failed_validation_set) > 0:
-            push_list = [e for e in push_list if e not in
+            push_list = [e for e in push_list if e[0] not in
                          failed_validation_set]
             for dsid in failed_validation_set:
                 try:
@@ -131,7 +131,7 @@ def do_push(args):
                           .format(err, uflag))
                     sys.exit(1)
 
-            for dsid in push_list:
+            for dsid, reset_tstamp in push_list:
                 shutil.copyfile(
                         os.path.join(LOCAL_WAF, "waf-" + dsid + ".xml"),
                         os.path.join(repo_path, dsid + ".xml"))
