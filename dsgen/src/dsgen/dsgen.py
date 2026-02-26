@@ -1168,7 +1168,7 @@ def main():
             cursor.execute((
                     "insert into metautil.dset_waf2 (dsid, uflag, "
                     "reset_tstamp) values (%s, '', 'Y') on conflict (dsid, "
-                    "uflag) do update set uflag = excluded.uflag, set "
+                    "uflag) do update set uflag = excluded.uflag, "
                     "reset_tstamp = excluded.reset_tstamp"), (dsid, ))
             mconn.commit()
 
