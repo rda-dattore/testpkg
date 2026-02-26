@@ -51,15 +51,16 @@ def do_push(args):
                         "('P', 'H') and dsid < 'd999000'"))
             elif args[0] == "queued-only":
                 mcursor.execute((
-                        "select w.dsid from metautil.dset_waf2 as w left join "
-                        "search.datasets as d on d.dsid = w.dsid where d.type "
-                        "in ('P', 'H') and w.uflag = ''"))
+                        "select w.dsid, w.reset_tstamp from metautil."
+                        "dset_waf2 as w left join search.datasets as d on d."
+                        "dsid = w.dsid where d.type in ('P', 'H') and w."
+                        "uflag = ''"))
             else:
                 print("Error: invalid DSID_LIST")
                 sys.exit(1)
 
             res = mcursor.fetchall()
-            push_list = [e[0] for e in res]
+            push_list = [(e[0], e[1]) for e in res]
 
         if len(push_list) == 0:
             print("No matching datasets found.")
@@ -77,16 +78,19 @@ def do_push(args):
         xml_schema = etree.XMLSchema(
                 etree.parse("/data/dset_waf/schemas/iso/iso19139.xsd"))
         failed_validation_set = set()
-        for dsid in push_list:
+        for dsid, reset_tstamp in push_list:
             try:
                 iso_rec = iso_19139.export(dsid, mdb_config, wdb_config)
-                date_stamp_index = iso_rec.find("<gmd:dateStamp>")
-                date_time_index = iso_rec.find("<gco:DateTime>",
-                                               date_stamp_index)
-                current_utc_datetime = (datetime.now(timezone.utc)
-                                        .strftime("%Y-%m-%dT%H:%M:%SZ"))
-                iso_rec = (iso_rec[0:date_time_index+14] + "" +
-                           current_utc_datetime + iso_rec[date_time_index+34:])
+                if reset_tstamp == "Y":
+                    date_stamp_index = iso_rec.find("<gmd:dateStamp>")
+                    date_time_index = iso_rec.find("<gco:DateTime>",
+                                                   date_stamp_index)
+                    current_utc_datetime = (datetime.now(timezone.utc)
+                                            .strftime("%Y-%m-%dT%H:%M:%SZ"))
+                    iso_rec = (iso_rec[0:date_time_index+14] + "" +
+                               current_utc_datetime +
+                               iso_rec[date_time_index+34:])
+
                 # validate the ISO record
                 root = etree.fromstring(iso_rec).find(".")
                 xml_schema.assertValid(root)
