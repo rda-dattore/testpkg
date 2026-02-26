@@ -196,19 +196,11 @@ def do_dbreset(args):
     try:
         conn = psycopg2.connect(**db_config)
         cursor = conn.cursor()
-        cursor.execute("select distinct dsid from metautil.dset_waf2")
-        dsids = cursor.fetchall()
         try:
-            cursor.execute("delete from metautil.dset_waf2")
+            cursor.execute("update metautil.dset_waf2 set uflag = ''")
             conn.commit()
-            for dsid in dsids:
-                cursor.execute((
-                        "insert into metautil.dset_waf2 values (%s, '')"),
-                        (dsid, ))
-                conn.commit()
         except Exception as err:
-            print(("Error while trying to clear a failed push: '{}', list: "
-                   "'{}'").format(err, ", ".join(dsids)))
+            print(f"Error while trying to clear a failed push: '{err}'")
 
     except Exception as err:
         print("Error while trying to fix a failed push: '{}'".format(err))
