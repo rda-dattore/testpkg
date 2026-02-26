@@ -51,7 +51,7 @@ def do_push(args):
                         "('P', 'H') and dsid < 'd999000'"))
             elif args[0] == "queued-only":
                 mcursor.execute((
-                        "select w.dsid from metautil.dset_waf as w left join "
+                        "select w.dsid from metautil.dset_waf2 as w left join "
                         "search.datasets as d on d.dsid = w.dsid where d.type "
                         "in ('P', 'H') and w.uflag = ''"))
             else:
@@ -68,7 +68,7 @@ def do_push(args):
         uflag = ""
         if args[0] == "queued-only":
             uflag = strand(10)
-            mcursor.execute("update metautil.dset_waf set uflag = %s",
+            mcursor.execute("update metautil.dset_waf2 set uflag = %s",
                             (uflag, ))
             mconn.commit()
 
@@ -104,7 +104,7 @@ def do_push(args):
             for dsid in failed_validation_set:
                 try:
                     mcursor.execute((
-                            "update metautil.dset_waf set uflag = '' where "
+                            "update metautil.dset_waf2 set uflag = '' where "
                             "dsid = %s"), (dsid, ))
                     mconn.commit()
                 except Exception as err:
@@ -165,7 +165,7 @@ def do_push(args):
                 err = o.stderr.decode("utf-8")
 
         if len(uflag) > 0:
-            mcursor.execute("delete from metautil.dset_waf where uflag = %s",
+            mcursor.execute("delete from metautil.dset_waf2 where uflag = %s",
                             (uflag, ))
             mconn.commit()
 
@@ -192,14 +192,15 @@ def do_dbreset(args):
     try:
         conn = psycopg2.connect(**db_config)
         cursor = conn.cursor()
-        cursor.execute("select distinct dsid from metautil.dset_waf")
+        cursor.execute("select distinct dsid from metautil.dset_waf2")
         dsids = cursor.fetchall()
         try:
-            cursor.execute("delete from metautil.dset_waf")
+            cursor.execute("delete from metautil.dset_waf2")
             conn.commit()
             for dsid in dsids:
-                cursor.execute("insert into metautil.dset_waf values (%s, '')",
-                               (dsid, ))
+                cursor.execute((
+                        "insert into metautil.dset_waf2 values (%s, '')"),
+                        (dsid, ))
                 conn.commit()
         except Exception as err:
             print(("Error while trying to clear a failed push: '{}', list: "
