@@ -5,7 +5,6 @@ import shutil
 import subprocess
 import sys
 
-from datetime import datetime, timezone
 from libpkg.metaformats import iso_19139
 from libpkg.strutils import strand
 from lxml import etree
@@ -51,16 +50,15 @@ def do_push(args):
                         "('P', 'H') and dsid < 'd999000'"))
             elif args[0] == "queued-only":
                 mcursor.execute((
-                        "select w.dsid, w.reset_tstamp from metautil."
-                        "dset_waf2 as w left join search.datasets as d on d."
-                        "dsid = w.dsid where d.type in ('P', 'H') and w."
-                        "uflag = ''"))
+                        "select w.dsid from metautil.dset_waf2 as w left join "
+                        "search.datasets as d on d.dsid = w.dsid where d.type "
+                        "in ('P', 'H') and w.uflag = ''"))
             else:
                 print("Error: invalid DSID_LIST")
                 sys.exit(1)
 
             res = mcursor.fetchall()
-            push_list = [e for e in res]
+            push_list = [e[0] for e in res]
 
         if len(push_list) == 0:
             print("No matching datasets found.")
@@ -78,19 +76,9 @@ def do_push(args):
         xml_schema = etree.XMLSchema(
                 etree.parse("/data/dset_waf/schemas/iso/iso19139.xsd"))
         failed_validation_set = set()
-        for dsid, reset_tstamp in push_list:
+        for dsid in push_list:
             try:
                 iso_rec = iso_19139.export(dsid, mdb_config, wdb_config)
-                if reset_tstamp == "Y":
-                    date_stamp_index = iso_rec.find("<gmd:dateStamp>")
-                    date_time_index = iso_rec.find("<gco:DateTime>",
-                                                   date_stamp_index)
-                    current_utc_datetime = (datetime.now(timezone.utc)
-                                            .strftime("%Y-%m-%dT%H:%M:%SZ"))
-                    iso_rec = (iso_rec[0:date_time_index+14] + "" +
-                               current_utc_datetime +
-                               iso_rec[date_time_index+34:])
-
                 # validate the ISO record
                 root = etree.fromstring(iso_rec).find(".")
                 xml_schema.assertValid(root)
@@ -103,7 +91,7 @@ def do_push(args):
                 failed_validation_set.add(dsid)
 
         if len(failed_validation_set) > 0:
-            push_list = [e for e in push_list if e[0] not in
+            push_list = [e for e in push_list if e not in
                          failed_validation_set]
             for dsid in failed_validation_set:
                 try:
@@ -131,7 +119,7 @@ def do_push(args):
                           .format(err, uflag))
                     sys.exit(1)
 
-            for dsid, reset_tstamp in push_list:
+            for dsid in push_list:
                 shutil.copyfile(
                         os.path.join(LOCAL_WAF, "waf-" + dsid + ".xml"),
                         os.path.join(repo_path, dsid + ".xml"))
