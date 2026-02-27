@@ -161,6 +161,7 @@ def do_push(args):
                             (uflag, ))
             mconn.commit()
 
+        print(f"Pushed {len(push_list)} datasets.")
     except Exception as err:
         print("An error occurred: '{}'".format(err))
     finally:
