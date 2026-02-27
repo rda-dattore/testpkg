@@ -67,9 +67,13 @@ def do_push(args):
         uflag = ""
         if args[0] == "queued-only":
             uflag = strand(10)
+            print("QUEUED-ONLY! " + uflag)
             mcursor.execute("update metautil.dset_waf2 set uflag = %s",
                             (uflag, ))
             mconn.commit()
+            mcursor.execute("select dsid from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            res = mcursor.fetchall()
+            print(str(res))
 
         wconn = psycopg2.connect(**wdb_config)
         wcursor = wconn.cursor()
