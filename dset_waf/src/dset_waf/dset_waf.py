@@ -71,7 +71,7 @@ def do_push(args):
             mcursor.execute("update metautil.dset_waf2 set uflag = %s",
                             (uflag, ))
             mconn.commit()
-            mcursor.execute("select dsid from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
             res = mcursor.fetchall()
             print(str(res))
 
@@ -94,6 +94,7 @@ def do_push(args):
                 print("Warning: {} failed to validate: '{}'".format(dsid, err))
                 failed_validation_set.add(dsid)
 
+        print("FAILED VALIDATION: " + str(failed_validation_set))
         if len(failed_validation_set) > 0:
             push_list = [e for e in push_list if e not in
                          failed_validation_set]
