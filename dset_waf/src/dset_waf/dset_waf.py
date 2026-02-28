@@ -100,8 +100,10 @@ def do_push(args):
                          failed_validation_set]
             for dsid in failed_validation_set:
                 try:
+                    print(f"RESETING FLAG {dsid}")
                     mcursor.execute((
                             "update metautil.dset_waf2 set uflag = '' where "
+
                             "dsid = %s"), (dsid, ))
                     mconn.commit()
                 except Exception as err:
@@ -124,6 +126,7 @@ def do_push(args):
                           .format(err, uflag))
                     sys.exit(1)
 
+            print(o.stdout.decode("utf-8"))
             for dsid in push_list:
                 shutil.copyfile(
                         os.path.join(LOCAL_WAF, "waf-" + dsid + ".xml"),
@@ -137,6 +140,8 @@ def do_push(args):
                           .format(err, dsid, uflag))
                     sys.exit(1)
 
+
+            print("COPIED")
             o = subprocess.run(
                     "git -C " + repo_path + " commit -m 'auto update' -a",
                     shell=True, capture_output=True)
@@ -162,6 +167,10 @@ def do_push(args):
                 err = o.stderr.decode("utf-8")
 
         if len(uflag) > 0:
+            print("DELETING " + uflag)
+            mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            res = mcursor.fetchall()
+            print(str(res))
             mcursor.execute("delete from metautil.dset_waf2 where uflag = %s",
                             (uflag, ))
             mconn.commit()
