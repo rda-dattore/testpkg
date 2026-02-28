@@ -72,6 +72,7 @@ def do_push(args):
                             (uflag, ))
             mconn.commit()
             mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            print(mcursor.query)
             res = mcursor.fetchall()
             print(str(res))
 
@@ -106,6 +107,7 @@ def do_push(args):
 
                             "dsid = %s"), (dsid, ))
                     mconn.commit()
+                    print(mcursor.query)
                 except Exception as err:
                     print((
                             "Warning: unable to reset uflag for '{}': error: "
@@ -169,6 +171,7 @@ def do_push(args):
         if len(uflag) > 0:
             print("DELETING " + uflag)
             mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            print(mcursor.query)
             res = mcursor.fetchall()
             print(str(res))
             mcursor.execute("delete from metautil.dset_waf2 where uflag = %s",
