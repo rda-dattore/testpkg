@@ -144,6 +144,10 @@ def do_push(args):
 
 
             print("COPIED")
+            mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            print(mcursor.query)
+            res = mcursor.fetchall()
+            print(str(res))
             o = subprocess.run(
                     "git -C " + repo_path + " commit -m 'auto update' -a",
                     shell=True, capture_output=True)
@@ -153,6 +157,10 @@ def do_push(args):
                       .format(err, uflag))
                 sys.exit(1)
 
+            mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            print(mcursor.query)
+            res = mcursor.fetchall()
+            print(str(res))
             o = subprocess.run("git -C " + repo_path + " push -q", shell=True,
                                capture_output=True)
             err = o.stderr.decode("utf-8")
@@ -167,6 +175,11 @@ def do_push(args):
                         "git -C " + repo_path + " stash drop 'stash@{0}'",
                         shell=True, capture_output=True)
                 err = o.stderr.decode("utf-8")
+
+            mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            print(mcursor.query)
+            res = mcursor.fetchall()
+            print(str(res))
 
         if len(uflag) > 0:
             print("DELETING " + uflag)
