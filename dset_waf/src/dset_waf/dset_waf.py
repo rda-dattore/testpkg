@@ -96,6 +96,10 @@ def do_push(args):
                 failed_validation_set.add(dsid)
 
         print("FAILED VALIDATION: " + str(failed_validation_set))
+        mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
+        print(mcursor.query)
+        res = mcursor.fetchall()
+        print(str(res))
         if len(failed_validation_set) > 0:
             push_list = [e for e in push_list if e not in
                          failed_validation_set]
@@ -115,6 +119,11 @@ def do_push(args):
 
         for repo in GIT_REPOS:
             repo_path = os.path.join(REPO_HEAD, repo)
+            print("REPO_PATH = " + str(repo_path))
+            mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            print(mcursor.query)
+            res = mcursor.fetchall()
+            print(str(res))
             o = subprocess.run((
                     "git -C " + repo_path + " stash; git -C " + repo_path +
                     " pull -q"), shell=True, capture_output=True)
