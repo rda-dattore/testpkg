@@ -4,6 +4,7 @@ import psycopg2
 import shutil
 import subprocess
 import sys
+import time
 
 from libpkg.metaformats import iso_19139
 from libpkg.strutils import strand
@@ -42,6 +43,7 @@ def do_push(args):
 
     try:
         mconn = psycopg2.connect(**mdb_config)
+        mconn.autocommit = True
         mcursor = mconn.cursor()
         if len(push_list) == 0:
             if args[0] == "all":
@@ -70,7 +72,6 @@ def do_push(args):
             print("QUEUED-ONLY! " + uflag)
             mcursor.execute("update metautil.dset_waf2 set uflag = %s",
                             (uflag, ))
-            mconn.commit()
             mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
             print(mcursor.query)
             res = mcursor.fetchall()
@@ -96,10 +97,18 @@ def do_push(args):
                 failed_validation_set.add(dsid)
 
         print("FAILED VALIDATION: " + str(failed_validation_set))
-        mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
-        print(mcursor.query)
-        res = mcursor.fetchall()
-        print(str(res))
+        num_tries = 0
+        while num_tries < 3:
+            mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            print(mcursor.query)
+            res = mcursor.fetchall()
+            print("num_tries=" + str(num_tries) + " " + str(res))
+            if len(res) > 0:
+                break
+
+            num_tries += 1
+            time.sleep(15)
+
         if len(failed_validation_set) > 0:
             push_list = [e for e in push_list if e not in
                          failed_validation_set]
@@ -110,7 +119,6 @@ def do_push(args):
                             "update metautil.dset_waf2 set uflag = '' where "
 
                             "dsid = %s"), (dsid, ))
-                    mconn.commit()
                     print(mcursor.query)
                 except Exception as err:
                     print((
@@ -198,7 +206,6 @@ def do_push(args):
             print(str(res))
             mcursor.execute("delete from metautil.dset_waf2 where uflag = %s",
                             (uflag, ))
-            mconn.commit()
 
         print(f"Pushed {len(push_list)} datasets.")
     except Exception as err:
