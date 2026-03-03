@@ -77,8 +77,6 @@ def do_push(args):
             res = mcursor.fetchall()
             print(str(res))
 
-        wconn = psycopg2.connect(**wdb_config)
-        wcursor = wconn.cursor()
         xml_schema = etree.XMLSchema(
                 etree.parse("/data/dset_waf/schemas/iso/iso19139.xsd"))
         failed_validation_set = set()
@@ -213,9 +211,6 @@ def do_push(args):
     finally:
         if 'mconn' in locals():
             mconn.close()
-
-        if 'wconn' in locals():
-            wconn.close()
 
 
 def do_delete(args):
