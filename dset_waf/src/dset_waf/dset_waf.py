@@ -77,6 +77,7 @@ def do_push(args):
             res = mcursor.fetchall()
             print(str(res))
 
+        mconn.close()
         xml_schema = etree.XMLSchema(
                 etree.parse("/data/dset_waf/schemas/iso/iso19139.xsd"))
         failed_validation_set = set()
@@ -95,6 +96,9 @@ def do_push(args):
                 failed_validation_set.add(dsid)
 
         print("FAILED VALIDATION: " + str(failed_validation_set))
+        mconn = psycopg2.connect(**mdb_config)
+        mconn.autocommit = True
+        mcursor = mconn.cursor()
         num_tries = 0
         while num_tries < 3:
             mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
