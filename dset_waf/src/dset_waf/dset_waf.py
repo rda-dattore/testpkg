@@ -31,6 +31,7 @@ def do_push(args):
     del args[-1]
     push_list = []
     if len(args) > 1:
+        print("ARGS=" + str(args))
         for arg in args:
             if arg[0] == 'd':
                 push_list.append(arg)
@@ -45,7 +46,9 @@ def do_push(args):
         mconn = psycopg2.connect(**mdb_config)
         mconn.autocommit = True
         mcursor = mconn.cursor()
+        print("Connect to DB: push_list=" + str(push_list)
         if len(push_list) == 0:
+            print("EMPTY push_list, querying DB")
             if args[0] == "all":
                 mcursor.execute((
                         "select dsid from search.datasets where type in "
@@ -59,7 +62,9 @@ def do_push(args):
                 print("Error: invalid DSID_LIST")
                 sys.exit(1)
 
+            print(mcursor.query)
             res = mcursor.fetchall()
+            print(res)
             push_list = [e[0] for e in res]
 
         if len(push_list) == 0:
