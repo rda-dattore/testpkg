@@ -46,7 +46,7 @@ def do_push(args):
         mconn = psycopg2.connect(**mdb_config)
         mconn.autocommit = True
         mcursor = mconn.cursor()
-        print("Connect to DB: push_list=" + str(push_list)
+        print("Connect to DB: push_list=" + str(push_list))
         if len(push_list) == 0:
             print("EMPTY push_list, querying DB")
             if args[0] == "all":
