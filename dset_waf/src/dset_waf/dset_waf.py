@@ -71,7 +71,7 @@ def do_push(args):
             print("No matching datasets found.")
             sys.exit(1)
 
-        if len(push_list) > 15:
+        if len(push_list) > 45:
             print("Too many datasets? " + str(push_list))
             sys.exit(1)
 
