@@ -2,6 +2,7 @@ import json
 import os
 import psycopg2
 import shutil
+import socket
 import subprocess
 import sys
 import time
@@ -303,6 +304,9 @@ def print_usage_and_exit():
 def main():
     if len(sys.argv) == 1 or sys.argv[1] == "--help":
         print_usage_and_exit()
+
+    if not socket.gethostname().startswith("gdex-webserver"):
+        sys.exit(1)
 
     if sys.argv[1] not in ACTIONS.keys():
         print("Error: invalid action - must be one of: " +
