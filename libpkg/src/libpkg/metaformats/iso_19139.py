@@ -8,22 +8,10 @@ from . import settings
 from ..geospatial import fill_geographic_extent_data
 from ..metautils import (get_dataset_size,
                          get_date_from_precision,
+                         metadata_date,
                          open_dataset_overview)
 from ..strutils import snake_to_capital
 from ..xmlutils import convert_html_to_text
-
-
-def metadata_date(dsid, d1, cursor):
-    d2 = datetime(1000, 1, 1, 0, 0, 0)
-    try:
-        cursor.execute((
-                "select max(date_created + time_created) from dssdb.wfile_" +
-                dsid))
-        d2 = cursor.fetchone()[0] + timedelta(hours=6)
-    except Exception:
-        pass
-
-    return max(d1, d2)
 
 
 def add_file_identifier(root, nsmap, dsid):
@@ -121,10 +109,10 @@ def add_contact(root, nsmap):
             codeListValue="pointOfContact").text = "pointOfContact"
 
 
-def add_date_stamp(root, nsmap, tstamp):
+def add_date_stamp(root, nsmap, date_stamp):
     etree.SubElement(
             etree.SubElement(root, "{" + nsmap['gmd'] + "}dateStamp"),
-            "{" + nsmap['gco'] + "}DateTime").text = tstamp
+            "{" + nsmap['gco'] + "}DateTime").text = date_stamp
 
 
 def add_metadata_standard(root, nsmap):
@@ -977,10 +965,9 @@ def export(dsid, metadb_settings, wagtaildb_settings):
         raise RuntimeError("metadata database connection error: '{}'"
                            .format(err))
     try:
-        mcursor.execute(("select timestamp_utc, title, summary, pub_date, "
-                         "continuing_update from search.datasets where dsid = "
-                         "%s"), (dsid, ))
-        tstamp, title, abstract, pub_date, progress = mcursor.fetchone()
+        mcursor.execute(("select title, summary, pub_date, continuing_update "
+                         "from search.datasets where dsid = %s"), (dsid, ))
+        title, abstract, pub_date, progress = mcursor.fetchone()
         abstract = convert_html_to_text(
                 "<abstract>" + abstract + "</abstract>")
         progress = "onGoing" if progress == "Y" else "completed"
@@ -1010,9 +997,10 @@ def export(dsid, metadb_settings, wagtaildb_settings):
         add_charset(root, nsmap)
         add_hierarchy_level(root, nsmap)
         add_contact(root, nsmap)
-        add_date_stamp(root, nsmap,
-                       metadata_date(dsid, tstamp, mcursor).strftime(
-                               "%Y-%m-%dT%H:%M:%SZ"))
+        mdate = metadata_date(dsid, mcursor)
+        if mdate is not None:
+            add_date_stamp(root, nsmap, mdate.strftime("%Y-%m-%dT%H:%M:%SZ"))
+
         add_metadata_standard(root, nsmap)
         add_dataset_uri(root, nsmap, dsid, mcursor)
         lst = xml_root.findall("./relatedResource")
