@@ -1,6 +1,6 @@
 import requests
 
-from datetime import timedelta
+from datetime import timedelta, timezone
 from lxml import etree
 from zoneinfo import ZoneInfo
 
@@ -89,7 +89,7 @@ def metadata_date(dsid, cursor):
         cursor.execute(
                 "select timestamp_utc from search.datasets where dsid = %s",
                 (dsid, ))
-        tstamp_utc = cursor.fetchone()[0]
+        tstamp_utc = cursor.fetchone()[0].replace(tzinfo=timezone.utc)
     except Exception:
         pass
 
