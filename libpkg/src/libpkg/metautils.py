@@ -1,5 +1,6 @@
 import requests
 
+from datetime import timedelta
 from lxml import etree
 
 
@@ -7,7 +8,7 @@ def open_dataset_overview(dsid):
     try:
         resp = requests.get("http://localhost:8080/datasets/" + dsid +
                             "/native/")
-    except:
+    except Exception:
         resp = requests.get("https://gdex.ucar.edu/datasets/" + dsid +
                             "/native/")
         if resp.status_code != 200:
@@ -80,3 +81,32 @@ def get_pages(pages):
         }
 
     return {}
+
+
+def metadata_date(dsid, cursor):
+    try:
+        cursor.execute(
+                "select timestamp_utc from search.datasets where dsid = %s",
+                (dsid, ))
+        tstamp_utc = cursor.fetchone()[0]
+    except Exception:
+        pass
+
+    try:
+        cursor.execute((
+                "select max(date_created + time_created) from dssdb.wfile_" +
+                dsid))
+        wfile_date = cursor.fetchone()[0] + timedelta(hours=6)
+    except Exception:
+        pass
+
+    if 'tstamp_utc' in locals():
+        if 'wfile_date' in locals():
+            return max(tstamp_utc, wfile_date)
+        else:
+            return tstamp_utc
+
+    elif 'wfile_date' in locals():
+        return 'wfile_date'
+
+    return None
