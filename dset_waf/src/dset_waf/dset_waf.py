@@ -181,7 +181,7 @@ def do_push(args):
                     "git -C " + repo_path + " commit -m 'auto update' -a",
                     shell=True, capture_output=True)
             err = o.stderr.decode("utf-8")
-            if len(err) > 0:
+            if len(err) > 0 and err.find("Auto packing") < 0:
                 print(("git commit error: '{}'; uflag was '{}'")
                       .format(err, uflag))
                 sys.exit(1)
