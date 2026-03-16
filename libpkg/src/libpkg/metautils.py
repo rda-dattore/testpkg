@@ -2,6 +2,7 @@ import requests
 
 from datetime import timedelta
 from lxml import etree
+from zoneinfo import ZoneInfo
 
 
 def open_dataset_overview(dsid):
@@ -96,7 +97,9 @@ def metadata_date(dsid, cursor):
         cursor.execute((
                 "select max(date_created + time_created) from dssdb.wfile_" +
                 dsid))
-        wfile_date = cursor.fetchone()[0] + timedelta(hours=6)
+        wfile_date = cursor.fetchone()[0].replace(
+                tzinfo=ZoneInfo("America/Denver"))
+        wfile_date = wfile_date + timedelta(hours=7) - wfile_date.dst()
     except Exception:
         pass
 
