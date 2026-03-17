@@ -68,6 +68,7 @@ def get_dataset_size(dsid, cursor, **kwargs):
         size = str(round(size, 3))
         if 'valueOnly' not in kwargs:
             size += " " + units[num_div]
+
         return size
 
     return None
@@ -113,3 +114,25 @@ def metadata_date(dsid, cursor):
         return 'wfile_date'
 
     return None
+
+
+def get_temporal_range(dsid, cursor):
+    try:
+        cursor.execute((
+                "select min(concat(date_start, ' ', time_start)), min("
+                "start_flag), max(concat(date_end, ' ', time_end)), min("
+                "end_flag), min(time_zone) from dssdb.dsperiod where dsid = "
+                "%s and date_start < '9998-01-01' and date_end < '9998-01-01' "
+                "having length(min(concat(date_start, ' ', time_start))) > 0"),
+                (dsid, ))
+        res = cursor.fetchone()
+        if res is not None:
+            tz = res[4]
+            idx = tz.find(",")
+            if idx > 0:
+                tz = tz[0:idx]
+
+            return (get_date_from_precision(res[0], res[1], tz),
+                    get_date_from_precision(res[2], res[3], tz))
+    except Exception:
+        return (None, None)
