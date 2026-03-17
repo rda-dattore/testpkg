@@ -136,3 +136,5 @@ def get_temporal_range(dsid, cursor):
                     get_date_from_precision(res[2], res[3], tz))
     except Exception:
         return (None, None)
+
+    return (None, None)
