@@ -11,19 +11,23 @@ def make_tempdir(root_dir):
         tdir_name = tempfile.mkdtemp(dir=root_dir)
         os.chmod(tdir_name, 0o777)
         return tdir_name
-    except:
+    except Exception:
         return ""
 
 
 def remove_tempdir(tdir_name):
     try:
         shutil.rmtree(tdir_name)
-    except:
+    except Exception:
         pass
 
 
 def sendmail(to_list, from_addr, subject, body, **kwargs):
-    port = 1025 if 'devel' in kwargs and kwargs['devel'] else 465
+    if 'port' in kwargs:
+        port = kwargs['port']
+    else:
+        port = 1025 if 'devel' in kwargs and kwargs['devel'] else 465
+
     host = kwargs['host'] if 'host' in kwargs else "localhost"
     s = smtplib.SMTP(host, port)
     msg = EmailMessage()
