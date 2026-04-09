@@ -24,7 +24,8 @@ def remove_tempdir(tdir_name):
 
 def sendmail(to_list, from_addr, subject, body, **kwargs):
     port = 1025 if 'devel' in kwargs and kwargs['devel'] else 465
-    s = smtplib.SMTP('localhost', port)
+    host = kwargs['host'] if 'host' in kwargs else "localhost"
+    s = smtplib.SMTP(host, port)
     msg = EmailMessage()
     msg['To'] = ", ".join(to_list)
     msg['From'] = from_addr
