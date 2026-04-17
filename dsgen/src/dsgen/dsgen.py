@@ -398,8 +398,8 @@ def add_proceedings(doi, publisher, cursor, citation):
 def get_citations(dsid, cursor):
     citations = {}
     cursor.execute((
-            "select distinct d.doi_work from citation.data_citations as d "
-            "left join dssdb.dsvrsn as v on v.doi = d.doi_data where v.dsid "
+            "select distinct d.doi_work from citation.data_citations_gdex as "
+            "d left join dssdb.dsvrsn as v on v.doi = d.doi_data where v.dsid "
             "= %s"), (dsid, ))
     res = cursor.fetchall()
     for e in res:
