@@ -411,7 +411,7 @@ def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
 
         metadb_cursor.execute((
                 "select c.doi_work, w.type, count(a.last_name) from citation."
-                "data_citations as c left join (select distinct doi from "
+                "data_citations_gdex as c left join (select distinct doi from "
                 "dssdb.dsvrsn where dsid = %s) as v on v.doi = c.doi_data "
                 "left join citation.works_authors as a on a.id = c.doi_work "
                 "left join citation.works as w on w.doi = c.doi_work where v."
