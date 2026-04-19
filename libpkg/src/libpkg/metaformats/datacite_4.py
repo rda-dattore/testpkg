@@ -201,7 +201,7 @@ def to_xml(dc_data, **kwargs):
             etree.SubElement(root, "descriptions"),
             "description", descriptionType=d['descriptionType']).text = (
             d['description'])
-    if len(dc_data['geoLocations']) > 0:
+    if 'geoLocations' in dc_data and len(dc_data['geoLocations']) > 0:
         geolocs = etree.SubElement(root, "geoLocations")
         for loc in dc_data['geoLocations']:
             e = etree.SubElement(geolocs, "geoLocation")
