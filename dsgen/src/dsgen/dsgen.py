@@ -678,7 +678,9 @@ def add_publications(dsid, xml, wconn):
         year = pub.find("./year").text
         auth_list = pub.find("./authorList").text
         key = year + auth_list
-        pubs.append([key, auth_list + ", " + year + ": "])
+        pubs.append([key,
+                     html.escape(unicode_escape(auth_list)) + ", " + year +
+                     ": "])
         ptyp = pub.get("type")
         if ptyp == "journal":
             add_journal_to_publication(pub, pubs[-1])
