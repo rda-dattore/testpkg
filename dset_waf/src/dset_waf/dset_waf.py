@@ -28,6 +28,11 @@ def do_push(args):
         print("Error: missing argument(s) for PUSH")
         sys.exit(1)
 
+    override_max = False
+    if args[0] == "--override-max":
+        override_max = True
+        del args[0]
+
     wdb_config = json.loads(args[-1])
     del args[-1]
     mdb_config = json.loads(args[-1])
@@ -74,7 +79,7 @@ def do_push(args):
             print("No matching datasets found.")
             sys.exit(1)
 
-        if len(push_list) > 45:
+        if not override_max and len(push_list) > 45:
             print("Too many datasets? " + str(push_list))
             smtp = smtplib.SMTP('localhost')
             msg = EmailMessage()
@@ -280,7 +285,8 @@ ACTIONS = {
 
 
 def print_usage_and_exit():
-    print(("usage: dset_waf PUSH DSID_LIST META_DBCONFIG WAGTAIL_CONFIG"))
+    print("usage: dset_waf PUSH [--override-max] DSID_LIST META_DBCONFIG "
+          "WAGTAIL_CONFIG")
     print("  or:  dset_waf DELETE DSID_LIST META_DBCONFIG")
     print("  or:  dset_waf DBRESET META_DBCONFIG")
     print("")
