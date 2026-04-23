@@ -2,11 +2,13 @@ import json
 import os
 import psycopg2
 import shutil
+import smtplib
 import socket
 import subprocess
 import sys
 import time
 
+from email.message import EmailMessage
 from libpkg.metaformats import iso_19139
 from libpkg.strutils import strand
 from lxml import etree
@@ -74,6 +76,14 @@ def do_push(args):
 
         if len(push_list) > 45:
             print("Too many datasets? " + str(push_list))
+            smtp = smtplib.SMTP('localhost')
+            msg = EmailMessage()
+            msg['From'] = "dattore@ucar.edu"
+            msg['To'] = "dattore@ucar.edu"
+            msg['Subject'] = "dset_waf failure"
+            msg.set_content(f"Too many datasets? {push_list}")
+            smtp.send_message(msg)
+            smtp.quit()
             sys.exit(1)
 
         uflag = ""
