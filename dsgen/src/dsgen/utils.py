@@ -1,5 +1,7 @@
 import html
 
+from unidecode import unidecode
+
 
 def name_to_initial(name):
     parts = name.strip().split()
@@ -17,7 +19,7 @@ def name_to_initial(name):
 
 
 def unicode_escape(s):
-    u = s.replace("\\\\u", "\\u")
+    u = unidecode(s).replace("\\\\u", "\\u")
     return u.encode("utf-8").decode("unicode-escape")
 
 
