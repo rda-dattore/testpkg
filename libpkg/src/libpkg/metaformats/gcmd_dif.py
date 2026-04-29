@@ -53,9 +53,11 @@ def export(dsid, metadb_settings, wagtaildb_settings):
         etree.SubElement(root, "Entry_Title").text = title
         ds_citation = etree.SubElement(root, "Data_Set_Citation")
         creators = []
-        mcursor.execute((
-                "select type, given_name, middle_name, family_name from "
-                "search.dataset_authors where dsid = %s"), (dsid, ))
+        mcursor.execute(
+                "select a.type, a.given_name, a.middle_name, a.family_name "
+                "from search.authors as a left join search.dataset_authors as "
+                "d on d.uuid = a.uuid where d.dsid = %s order by d.sequence",
+                (dsid, ))
         res = mcursor.fetchall()
         if len(res) > 0:
             for atype, first, middle, last in res:

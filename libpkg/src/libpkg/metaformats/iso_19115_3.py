@@ -212,9 +212,10 @@ def add_metadata_linkage(root, nsmap, dsid):
 
 
 def add_authors(root, nsmap, cursor, dsid):
-    cursor.execute((
-            "select type, given_name, middle_name, family_name from search."
-            "dataset_authors where dsid = %s"), (dsid, ))
+    cursor.execute(
+            "select a.type, a.given_name, a.middle_name, a.family_name from "
+            "search.authors as a left join search.dataset_authors as d on d."
+            "uuid = a.uuid where d.dsid = %s order by d.sequence", (dsid, ))
     authors = cursor.fetchall()
     if len(authors) == 0:
         cursor.execute((

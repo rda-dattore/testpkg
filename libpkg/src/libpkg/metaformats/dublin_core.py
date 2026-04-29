@@ -30,9 +30,11 @@ def export_html_meta(dsid, metadb_settings):
 
         meta_tags.append(
                 '<meta name="DC.identifier" content="' + identifier + '"/>')
-        cursor.execute((
-                "select type, given_name, middle_name, family_name from "
-                "search.dataset_authors where dsid = %s"), (dsid, ))
+        cursor.execute(
+                "select a.type, a.given_name, a.middle_name, a.family_name "
+                "from search.authors as a left join search.dataset_authors as "
+                "d on d.uuid = a.uuid where d.dsid = %s order by d.sequence",
+                (dsid, ))
         authors = cursor.fetchall()
         if len(authors) > 0:
             for author in authors:
@@ -131,9 +133,11 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
         xml_root = open_dataset_overview(dsid)
         dc_ns = "{" + nsmap['dc'] + "}"
         etree.SubElement(root, dc_ns + "title").text = title
-        mcursor.execute((
-                "select type, given_name, middle_name, family_name from "
-                "search.dataset_authors where dsid = %s"), (dsid, ))
+        mcursor.execute(
+                "select a.type, a.given_name, a.middle_name, .afamily_name "
+                "from search.authors as a left join search.dataset_authors as "
+                "d on d.uuid = a.uuid where d.dsid = %s order by d.sequence",
+                (dsid, ))
         authors = mcursor.fetchall()
         if len(authors) > 0:
             for author in authors:
