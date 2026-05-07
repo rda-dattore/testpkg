@@ -566,11 +566,11 @@ def add_journal_to_publication(element, pub):
     pub[-1] += ". <i>{}</i>, ".format(periodical.text)
     pages = periodical.get("pages")
     if pages == "0-0":
-        if number == 0:
+        if number == "0":
             pub[-1] += "Submitted"
-        elif number == 1:
+        elif number == "1":
             pub[-1] += "Accepted"
-        elif number == 2:
+        elif number == "2":
             pub[-1] += "In Press"
     else:
         pub[-1] += "<b>{}</b>, ".format(number)
