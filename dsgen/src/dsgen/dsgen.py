@@ -444,6 +444,7 @@ def get_citations(dsid, cursor):
         elif type == "P":
             citation = add_proceedings(doi, publisher, cursor, citation)
 
+        citation = citation.replace("&amp;", "&")
         if len(citation) > 0:
             citations[pub_year].append((auth_list, citation))
 
