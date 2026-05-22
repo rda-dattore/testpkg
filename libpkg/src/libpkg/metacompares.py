@@ -65,8 +65,9 @@ def compare_levels(l1, l2):
     if l1_parts[0] == l2_parts[0]:
         vu1_parts = l1_parts[1].split(", ")[0].split()
         vu2_parts = l2_parts[1].split(", ")[0].split()
-        if (vu1_parts[1] == "mbar" or vu1_parts[1].find("Pa") >= 0 or
-                l1_parts[0][0:5] == "Sigma"):
+        if (len(vu1_parts) > 1 and
+                (vu1_parts[1] == "mbar" or vu1_parts[1].find("Pa") >= 0 or
+                 l1_parts[0][0:5] == "Sigma")):
             if float(vu1_parts[0]) > float(vu2_parts[0]):
                 return -1
 
