@@ -3,13 +3,27 @@ import os
 from lxml import etree
 
 
-def decode_level(data_format, map, type, value, mapset):
-    mapset_key = ".".join([data_format, map, "xml"])
+def decode_parameter(data_format, parameter_code, mapset):
+    pmap, pcode = parameter_code.split(":")
+    mapset_key = ".".join([data_format, pmap, "xml"])
+    if mapset_key not in mapset:
+        mapset[mapset_key] = etree.parse(os.path.join(
+                "/data/web/metadata/ParameterTables", mapset_key)).getroot()
+
+    desc = mapset[mapset_key].find(f"./parameter[@code='{pcode}']/description")
+    if desc is None:
+        return ""
+
+    return desc.text
+
+
+def decode_level(data_format, lmap, ltype, value, mapset):
+    mapset_key = ".".join([data_format, lmap, "xml"])
     if mapset_key not in mapset:
         mapset[mapset_key] = etree.parse(os.path.join(
                 "/data/web/metadata/LevelTables", mapset_key)).getroot()
 
-    types = type.split("-")
+    types = ltype.split("-")
     if len(types) == 1:
         tree = mapset[mapset_key].find(f"./level[@code='{type}']")
         if tree is None:
