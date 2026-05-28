@@ -238,8 +238,17 @@ def spatial_domain_from_grid_definition(gdef, **kwargs):
     return domain
 
 
-def convert_grid_definition(gdef):
+def convert_grid_definition(gdef: list[str, str], **kwargs):
     grid_data = gdef[1].split(":")
+    if 'output' in kwargs and kwargs['output'] == "text":
+        deg = "-deg"
+        small_open = ""
+        small_close = ""
+    else:
+        deg = "&deg;"
+        small_open = "<small>"
+        small_close = "</small>"
+
     if gdef[0] == "gaussLatLon":
         slat = float(grid_data[2][0:-1])
         elat = float(grid_data[4][0:-1])
@@ -249,47 +258,42 @@ def convert_grid_definition(gdef):
         else:
             yres = (slat - elat) / (float(grid_data[1]) - 1)
 
-        cdef = (
-                ("{}&deg; x ~{}&deg; from {} to {} and {} to {} <small>(").
-                format(grid_data[6], round(yres, 3), grid_data[3],
-                       grid_data[5], grid_data[2], grid_data[4]))
+        cdef = (f"{grid_data[6]}{deg} x ~{round(yres, 3)}{deg} from "
+                f"{grid_data[3]} to {grid_data[5]} and {grid_data[2]} to "
+                f"{grid_data[4]} {small_open}(")
         if grid_data[0] == "-1":
-            cdef += "reduced n{}".format(int(grid_data[1]) / 2)
+            cdef += f"reduced n{(int(grid_data[1]) / 2)}"
         else:
-            cdef += "{} x {}".format(grid_data[0], grid_data[1])
+            cdef += f"{grid_data[0]} x {grid_data[1]}"
 
-        cdef += " Longitude/Gaussian Latitude)</small>"
+        cdef += f" Longitude/Gaussian Latitude){small_close}"
         return cdef
     elif gdef[0] == "lambertConformal":
-        return (
-                ("{}km x {}km (at {}) oriented {} <small>({}x{} Lambert "
-                 "Conformal starting at {}, {})</small>")
-                .format(grid_data[7], grid_data[8], grid_data[4], grid_data[5],
-                        grid_data[0], grid_data[1], grid_data[2],
-                        grid_data[3]))
+        return (f"{grid_data[7]}km x {grid_data[8]}km (at {grid_data[4]}) "
+                f"oriented {grid_data[5]} {small_open}({grid_data[0]}x"
+                f"{grid_data[1]} Lambert Conformal starting at "
+                f"{grid_data[2]}, {grid_data[3]}){small_close}")
     elif gdef[0] == "latLon" or gdef[0] == "mercator":
-        cdef = "{}&deg; x ".format(grid_data[6])
+        cdef = f"{grid_data[6]}{deg} x "
         if gdef[0] == "mercator":
             cdef += "~"
 
-        cdef += (
-                ("{}&deg; from {} to {} and {} to {} <small>(")
-                .format(grid_data[7], grid_data[3], grid_data[5], grid_data[2],
-                        grid_data[4]))
+        cdef += (f"{grid_data[7]}{deg} from {grid_data[3]} to {grid_data[5]} "
+                 f"and {grid_data[2]} to {grid_data[4]} {small_open}(")
         if grid_data[0] == "-1":
             cdef += "reduced"
         else:
-            cdef += "{} x {}".format(grid_data[0], grid_data[1])
+            cdef += f"{grid_data[0]} x {grid_data[1]}"
 
         if gdef[0] == "latLon":
             cdef += " Latitude/Longitude"
         elif gdef[0] == "mercator":
             cdef += " Mercator"
 
-        cdef += ")</small>"
+        cdef += f"){small_close}"
         return cdef
     elif gdef[0] == "polarStereographic":
-        cdef = "{}km x {}km (at".format(grid_data[7], grid_data[8])
+        cdef = f"{grid_data[7]}km x {grid_data[8]}km (at"
         if len(grid_data[4]) > 0:
             cdef += grid_data[4]
         else:
@@ -300,10 +304,8 @@ def convert_grid_definition(gdef):
         else:
             orient = "South"
 
-        cdef += (
-                (") oriented {} <small>({} x {} {} Polar Stereographic)"
-                 "</small>").format(grid_data[5], grid_data[0], grid_data[1],
-                                    orient))
+        cdef += (f") oriented {grid_data[5]} {small_open}({grid_data[0]} x "
+                 f"{grid_data[1]} {orient} Polar Stereographic){small_close}")
         return cdef
     elif gdef[0] == "sphericalHarmonics":
         cdef = "Spherical Harmonics at "
@@ -312,5 +314,5 @@ def convert_grid_definition(gdef):
         elif int(grid_data[1]) == (int(grid_data[1]) + int(grid_data[2])):
             cdef += "R"
 
-        cdef += "{} spectral resolution".format(grid_data[1])
+        cdef += f"{grid_data[1]} spectral resolution"
         return cdef
