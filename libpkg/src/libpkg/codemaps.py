@@ -3,20 +3,6 @@ import os
 from lxml import etree
 
 
-def decode_parameter(data_format, parameter_code, mapset):
-    pmap, pcode = parameter_code.split(":")
-    mapset_key = ".".join([data_format, pmap, "xml"])
-    if mapset_key not in mapset:
-        mapset[mapset_key] = etree.parse(os.path.join(
-                "/data/web/metadata/ParameterTables", mapset_key)).getroot()
-
-    desc = mapset[mapset_key].find(f"./parameter[@code='{pcode}']/description")
-    if desc is None:
-        return ""
-
-    return desc.text
-
-
 def decode_level(data_format, lmap, ltype, value, mapset):
     mapset_key = ".".join([data_format, lmap, "xml"])
     if mapset_key not in mapset:
@@ -25,9 +11,9 @@ def decode_level(data_format, lmap, ltype, value, mapset):
 
     types = ltype.split("-")
     if len(types) == 1:
-        tree = mapset[mapset_key].find(f"./level[@code='{type}']")
+        tree = mapset[mapset_key].find(f"./level[@code='{ltype}']")
         if tree is None:
-            tree = mapset[mapset_key].find(f"./layer[@code='{type}']")
+            tree = mapset[mapset_key].find(f"./layer[@code='{ltype}']")
 
         if tree is None:
             return ""
@@ -70,3 +56,17 @@ def decode_level(data_format, lmap, ltype, value, mapset):
 
     return "".join(["Layer between '", desc1.text, "': ", vals[0], " and '",
                     desc2.text, "': ", vals[1]])
+
+
+def decode_parameter(data_format, parameter_code, mapset):
+    pmap, pcode = parameter_code.split(":")
+    mapset_key = ".".join([data_format, pmap, "xml"])
+    if mapset_key not in mapset:
+        mapset[mapset_key] = etree.parse(os.path.join(
+                "/data/web/metadata/ParameterTables", mapset_key)).getroot()
+
+    desc = mapset[mapset_key].find(f"./parameter[@code='{pcode}']/description")
+    if desc is None:
+        return ""
+
+    return desc.text
