@@ -95,22 +95,27 @@ def metadata_date(dsid, cursor):
         pass
 
     try:
-        cursor.execute((
-                "select max(date_created + time_created) from dssdb.wfile_" +
-                dsid))
-        wfile_date = cursor.fetchone()[0].replace(
-                tzinfo=ZoneInfo("America/Denver"))
-        wfile_date = wfile_date + timedelta(hours=7) - wfile_date.dst()
+        # check if wfile table exists
+        cursor.execute(
+                "select table_name from information_schema.tables where "
+                f"table_schema = 'dssdb' and table_name = 'wfile_{dsid}'")
+        tbl, = cursor.fetchone() or (None, )
+        if tbl is not None:
+            cursor.execute("select max(date_created + time_created) from "
+                           f"dssdb.{tbl}")
+            wfile_date = cursor.fetchone()[0].replace(
+                    tzinfo=ZoneInfo("America/Denver"))
+            wfile_date = wfile_date + timedelta(hours=7) - wfile_date.dst()
     except Exception:
         pass
 
     if 'tstamp_utc' in locals():
         if 'wfile_date' in locals():
             return max(tstamp_utc, wfile_date)
-        else:
-            return tstamp_utc
 
-    elif 'wfile_date' in locals():
+        return tstamp_utc
+
+    if 'wfile_date' in locals():
         return 'wfile_date'
 
     return None
