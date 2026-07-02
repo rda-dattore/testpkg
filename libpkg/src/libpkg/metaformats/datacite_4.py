@@ -456,7 +456,7 @@ def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
                         gdef = metadb_cursor.fetchone()
                         domain = spatial_domain_from_grid_definition(
                                 gdef, centerOn="primeMeridian")
-                        if all(domain):
+                        if not None in domain.values():
                             min_wlon = (domain['wlon'] if min_wlon is None else
                                         min(domain['wlon'], min_wlon))
                             min_slat = (domain['slat'] if min_slat is None else
