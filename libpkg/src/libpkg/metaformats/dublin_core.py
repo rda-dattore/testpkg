@@ -134,7 +134,7 @@ def export_oai_dc(dsid, metadb_settings, wagtail_settings):
         dc_ns = "{" + nsmap['dc'] + "}"
         etree.SubElement(root, dc_ns + "title").text = title
         mcursor.execute(
-                "select a.type, a.given_name, a.middle_name, .afamily_name "
+                "select a.type, a.given_name, a.middle_name, a.family_name "
                 "from search.authors as a left join search.dataset_authors as "
                 "d on d.uuid = a.uuid where d.dsid = %s order by d.sequence",
                 (dsid, ))
