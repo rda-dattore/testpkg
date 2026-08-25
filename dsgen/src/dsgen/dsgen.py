@@ -337,7 +337,7 @@ def add_book_chapter(doi, cursor, citation):
         if len(auth_s) > 0:
             auth_s += ", "
 
-        if author == authors[-1]:
+        if len(authors) > 1 and author == authors[-1]:
             auth_s += "and "
 
         auth_s += name_to_initial(author[0]) + " "
