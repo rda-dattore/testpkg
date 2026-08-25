@@ -307,9 +307,9 @@ def add_author(author, citation, last_author, ignore_orcid_id):
 
 
 def add_book_chapter(doi, cursor, citation):
-    cursor.execute((
-            "select pages, isbn from citation.book_chapter_works where doi = "
-            "%s"), (doi, ))
+    cursor.execute(
+            "select pages, isbn from citation.book_chapter_works where doi "
+            "ilike %s", (doi, ))
     book_data = cursor.fetchone()
     if book_data is None:
         return ""
