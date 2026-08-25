@@ -419,7 +419,7 @@ def get_citations(dsid, cursor):
 
         cursor.execute((
                 "select last_name, first_name, middle_name, orcid_id from "
-                "citation.works_authors where id = %s and id_type = 'DOI' "
+                "citation.works_authors where id ilike %s and id_type = 'DOI' "
                 "order by sequence"), (doi, ))
         authors = cursor.fetchall()
         if len(authors) == 0:
