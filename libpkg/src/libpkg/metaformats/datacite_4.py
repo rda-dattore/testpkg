@@ -41,30 +41,31 @@ def get_mandatory_fields(dsid, xml_root, cursor):
         mand['publisher']['publisherIdentifierScheme'] = "ROR"
 
     mand['creators'] = []
-    lst = xml_root.findall("./author")
-    if len(lst) > 0:
-        for author in lst:
+    cursor.execute(
+            "select type, given_name, family_name, pid from search."
+            "dataset_authors as d left join search.authors as a on a.uuid = d."
+            "uuid where dsid = %s", (dsid, ))
+    res = cursor.fetchall()
+    if len(res) > 0:
+        for author in res:
             mand['creators'].append({})
-            type = author.get("xsi:type")
-            if type is None or type == "authorPerson":
+            if author[0] is None or author[0] == "authorPerson":
                 mand['creators'][-1].update({
-                    'name': ", ".join([author.get("lname"),
-                                       author.get("fname")]),
+                    'name': ", ".join([author[2], author[1]]),
                     'nameType': "Personal",
-                    'givenName': author.get("fname"),
-                    'familyName': author.get("lname"),
+                    'givenName': author[1],
+                    'familyName': author[2],
                 })
-                orcid_id = author.get("orcid_id")
-                if orcid_id is not None:
+                if len(author[3]) > 0:
                     mand['creators'][-1].update({
                        'nameIdentifiers': [{
                            'schemeUri': "https://orcid.org",
-                           'nameIdentifier': "https://orcid.org/" + orcid_id,
+                           'nameIdentifier': f"https://orcid.org/{author[3]}",
                            'nameIdentifierScheme': "ORCID"}]})
 
             else:
                 mand['creators'][-1].update({
-                    'name': author.get("name").replace("&", "&amp;"),
+                    'name': author[1].replace("&", "&amp;"),
                     'nameType': "Organizational"
                 })
 
@@ -456,7 +457,7 @@ def export(dsid, metadb_settings, wagtaildb_settings, **kwargs):
                         gdef = metadb_cursor.fetchone()
                         domain = spatial_domain_from_grid_definition(
                                 gdef, centerOn="primeMeridian")
-                        if not None in domain.values():
+                        if None not in domain.values():
                             min_wlon = (domain['wlon'] if min_wlon is None else
                                         min(domain['wlon'], min_wlon))
                             min_slat = (domain['slat'] if min_slat is None else
