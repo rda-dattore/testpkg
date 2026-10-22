@@ -1,7 +1,6 @@
 import os
 import psycopg2
 
-from datetime import datetime, timedelta
 from lxml import etree
 
 from . import settings
@@ -214,13 +213,14 @@ def add_di_citation(root, nsmap, nil_reason, dsid, authors, cursor, title,
     for author in authors:
         auth_type = author.get("{" + nsmap['xsi'] + "}type")
         if auth_type is None or auth_type == "authorPerson":
+            name = (author.get("lname") + ", " + author.get("fname") + " " +
+                    author.get("mname")).strip()
+            title = ((author.get("fname") + " " + author.get("mname"))
+                     .strip() + " " + author.get("lname"))
             author_list.append({
                 'type': "P",
-                'name': (author.get("lname") + ", " + author.get("fname") + " "
-                         + author.get("mname")).strip(),
-                'title': ((author.get("fname") + " " +
-                          author.get("mname")).strip() + " " +
-                          author.get("lname"))})
+                'name': name.encode("utf-8").decode("unicode-escape"),
+                'title': title.encode("utf-8").decode("unicode-escape")})
             orcid_id = author.get("orcid_id")
             if orcid_id is not None:
                 author_list[-1].update({'orcid_id': orcid_id})
