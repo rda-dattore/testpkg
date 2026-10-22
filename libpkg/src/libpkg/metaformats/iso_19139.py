@@ -1016,4 +1016,5 @@ def export(dsid, metadb_settings, wagtaildb_settings):
         mconn.close()
         wconn.close()
 
-    return etree.tostring(root, pretty_print=True).decode("utf-8")
+    return etree.tostring(root, encoding="utf-8",
+                          pretty_print=True).decode("utf-8")
