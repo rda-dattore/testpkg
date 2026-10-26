@@ -43,7 +43,7 @@ def get_contributors(dsid, cursor):
     cursor.execute((
             "select g.path from search.contributors_new as c left join "
             "search.gcmd_providers as g on g.uuid = c.keyword where c.dsid = "
-            "%s and c.vocabulary = 'GCMD'"), (dsid, ))
+            "%s and c.vocabulary = 'GCMD' order by c.disp_order"), (dsid, ))
     res = cursor.fetchall()
     for e in res:
         id = e[0]
