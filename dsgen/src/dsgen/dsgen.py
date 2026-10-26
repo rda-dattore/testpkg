@@ -546,7 +546,10 @@ def add_html_field(dsid, xml, element_name, wconn, column_name):
         field = str(etree.tostring(field))
         field = (
                 field[field.find("<p>"):field.rfind("</p>")+4].strip()
-                .replace("&amp;", "&"))
+                .replace("&amp;", "&")
+                .replace("\\n", "")
+                .replace("\\'", "'")
+                )
     else:
         field = ""
 
