@@ -272,7 +272,6 @@ def do_delete(args):
         for dsid in delete_list:
             Path(os.path.join(
                  LOCAL_WAF, "waf-" + dsid + ".xml")).unlink(missing_ok=True)
-            os.remove(os.path.join(repo_path, dsid + ".xml"))
             o = subprocess.run(
                     "git -C " + repo_path + " rm " + dsid + ".xml",
                     shell=True, capture_output=True)
