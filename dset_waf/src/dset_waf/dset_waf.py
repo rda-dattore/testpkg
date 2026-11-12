@@ -23,6 +23,45 @@ GIT_REPOS = [
 ]
 
 
+def do_git_pull(repo_path, uflag):
+    o = subprocess.run(
+            "git -C " + repo_path + " stash; git -C " + repo_path + " pull "
+            "-q", shell=True, capture_output=True)
+    err = o.stderr.decode("utf-8")
+    if len(err) > 0:
+        if o.returncode == 0:
+            print(f"git pull message: '{err}'; uflag was '{uflag}'")
+        else:
+            print(f"git pull error: '{err}'; uflag was '{uflag}'")
+            sys.exit(1)
+
+    print(o.stdout.decode("utf-8"))
+
+
+def do_git_commit(repo_path, uflag):
+    o = subprocess.run(
+            "git -C " + repo_path + " commit -m 'auto update' -a",
+            shell=True, capture_output=True)
+    err = o.stderr.decode("utf-8")
+    if len(err) > 0 and err.find("Auto packing") < 0:
+        print(f"git commit error: '{err}'; uflag was '{uflag}'")
+        sys.exit(1)
+
+    o = subprocess.run("git -C " + repo_path + " push -q", shell=True,
+                       capture_output=True)
+    err = o.stderr.decode("utf-8")
+    if len(err) > 0 and err.find("remote: Resolving deltas") != 0:
+        print(f"git push error: '{err}'; uflag was '{uflag}'")
+        sys.exit(1)
+
+    err = ""
+    while len(err) == 0:
+        o = subprocess.run(
+                "git -C " + repo_path + " stash drop 'stash@{0}'",
+                shell=True, capture_output=True)
+        err = o.stderr.decode("utf-8")
+
+
 def do_push(args):
     if len(args) < 3:
         print("Error: missing argument(s) for PUSH")
@@ -97,7 +136,9 @@ def do_push(args):
             print("QUEUED-ONLY! " + uflag)
             mcursor.execute("update metautil.dset_waf2 set uflag = %s",
                             (uflag, ))
-            mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            mcursor.execute(
+                    "select dsid, uflag from metautil.dset_waf2 where uflag "
+                    "= %s", (uflag, ))
             print(mcursor.query)
             res = mcursor.fetchall()
             print(str(res))
@@ -126,7 +167,9 @@ def do_push(args):
         mcursor = mconn.cursor()
         num_tries = 0
         while num_tries < 3:
-            mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            mcursor.execute(
+                    "select dsid, uflag from metautil.dset_waf2 where uflag "
+                    "= %s", (uflag, ))
             print(mcursor.query)
             res = mcursor.fetchall()
             print("num_tries=" + str(num_tries) + " " + str(res))
@@ -155,24 +198,13 @@ def do_push(args):
         for repo in GIT_REPOS:
             repo_path = os.path.join(REPO_HEAD, repo)
             print("REPO_PATH = " + str(repo_path))
-            mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            mcursor.execute(
+                    "select dsid, uflag from metautil.dset_waf2 where uflag "
+                    "= %s", (uflag, ))
             print(mcursor.query)
             res = mcursor.fetchall()
             print(str(res))
-            o = subprocess.run((
-                    "git -C " + repo_path + " stash; git -C " + repo_path +
-                    " pull -q"), shell=True, capture_output=True)
-            err = o.stderr.decode("utf-8")
-            if len(err) > 0:
-                if o.returncode == 0:
-                    print(("git pull message: '{}'; uflag was '{}'")
-                          .format(err, uflag))
-                else:
-                    print(("git pull error: '{}'; uflag was '{}'")
-                          .format(err, uflag))
-                    sys.exit(1)
-
-            print(o.stdout.decode("utf-8"))
+            do_git_pull(repo_path, uflag)
             for dsid in push_list:
                 shutil.copyfile(
                         os.path.join(LOCAL_WAF, "waf-" + dsid + ".xml"),
@@ -186,48 +218,26 @@ def do_push(args):
                           .format(err, dsid, uflag))
                     sys.exit(1)
 
-
             print("COPIED")
-            mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            mcursor.execute(
+                    "select dsid, uflag from metautil.dset_waf2 where uflag = "
+                    "%s", (uflag, ))
             print(mcursor.query)
             res = mcursor.fetchall()
             print(str(res))
-            o = subprocess.run(
-                    "git -C " + repo_path + " commit -m 'auto update' -a",
-                    shell=True, capture_output=True)
-            err = o.stderr.decode("utf-8")
-            if len(err) > 0 and err.find("Auto packing") < 0:
-                print(("git commit error: '{}'; uflag was '{}'")
-                      .format(err, uflag))
-                sys.exit(1)
-
-            mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
-            print(mcursor.query)
-            res = mcursor.fetchall()
-            print(str(res))
-            o = subprocess.run("git -C " + repo_path + " push -q", shell=True,
-                               capture_output=True)
-            err = o.stderr.decode("utf-8")
-            if len(err) > 0 and err.find("remote: Resolving deltas") != 0:
-                print(("git push error: '{}'; uflag was '{}'")
-                      .format(err, uflag))
-                sys.exit(1)
-
-            err = ""
-            while len(err) == 0:
-                o = subprocess.run(
-                        "git -C " + repo_path + " stash drop 'stash@{0}'",
-                        shell=True, capture_output=True)
-                err = o.stderr.decode("utf-8")
-
-            mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            do_git_commit(repo_path, uflag)
+            mcursor.execute(
+                    "select dsid, uflag from metautil.dset_waf2 where uflag "
+                    "= %s", (uflag, ))
             print(mcursor.query)
             res = mcursor.fetchall()
             print(str(res))
 
         if len(uflag) > 0:
             print("DELETING " + uflag)
-            mcursor.execute("select dsid, uflag from metautil.dset_waf2 where uflag = %s", (uflag, ))
+            mcursor.execute(
+                    "select dsid, uflag from metautil.dset_waf2 where uflag "
+                    "= %s", (uflag, ))
             print(mcursor.query)
             res = mcursor.fetchall()
             print(str(res))
@@ -244,6 +254,35 @@ def do_push(args):
 
 def do_delete(args):
     print("do_delete")
+    if len(args) < 1:
+        print("Error: missing DSID_LIST for DELETE")
+        sys.exit(1)
+
+    delete_list = []
+    for arg in args:
+        if arg[0] == 'd':
+            delete_list.append(arg)
+        else:
+            print("Error: invalid dataset ID '{}'".format(arg))
+            sys.exit(1)
+
+    for repo in GIT_REPOS:
+        repo_path = os.path.join(REPO_HEAD, repo)
+        do_git_pull(repo_path, "")
+        for dsid in delete_list:
+            os.remove(os.path.join(LOCAL_WAF, "waf-" + dsid + ".xml"))
+            os.remove(os.path.join(repo_path, dsid + ".xml"))
+            o = subprocess.run(
+                    "git -C " + repo_path + " rm " + dsid + ".xml",
+                    shell=True, capture_output=True)
+            err = o.stderr.decode("utf-8")
+            if len(err) > 0:
+                print(f"git add error for {err}: '{dsid}'")
+                sys.exit(1)
+
+        do_git_commit(repo_path, "")
+
+    print(f"Deleted {len(delete_list)} datasets.")
 
 
 def do_dbreset(args):
