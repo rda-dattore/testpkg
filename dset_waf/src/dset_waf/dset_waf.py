@@ -11,6 +11,7 @@ import time
 from email.message import EmailMessage
 from libpkg.metaformats import iso_19139
 from libpkg.strutils import strand
+from pathlib import Path
 from lxml import etree
 
 
@@ -253,7 +254,6 @@ def do_push(args):
 
 
 def do_delete(args):
-    print("do_delete")
     if len(args) < 1:
         print("Error: missing DSID_LIST for DELETE")
         sys.exit(1)
@@ -270,7 +270,8 @@ def do_delete(args):
         repo_path = os.path.join(REPO_HEAD, repo)
         do_git_pull(repo_path, "")
         for dsid in delete_list:
-            os.remove(os.path.join(LOCAL_WAF, "waf-" + dsid + ".xml"))
+            Path(os.path.join(
+                 LOCAL_WAF, "waf-" + dsid + ".xml")).unlink(missing_ok=True)
             os.remove(os.path.join(repo_path, dsid + ".xml"))
             o = subprocess.run(
                     "git -C " + repo_path + " rm " + dsid + ".xml",
@@ -326,7 +327,7 @@ ACTIONS = {
 def print_usage_and_exit():
     print("usage: dset_waf PUSH [--override-max] DSID_LIST META_DBCONFIG "
           "WAGTAIL_CONFIG")
-    print("  or:  dset_waf DELETE DSID_LIST META_DBCONFIG")
+    print("  or:  dset_waf DELETE DSID_LIST")
     print("  or:  dset_waf DBRESET META_DBCONFIG")
     print("")
     print("valid actions:")
