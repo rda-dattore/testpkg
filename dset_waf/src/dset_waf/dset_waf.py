@@ -216,7 +216,7 @@ def do_push(args):
                 err = o.stderr.decode("utf-8")
                 if len(err) > 0:
                     print(("git add error for {}: '{}'; uflag was '{}'")
-                          .format(err, dsid, uflag))
+                          .format(dsid, err, uflag))
                     sys.exit(1)
 
             print("COPIED")
@@ -277,7 +277,7 @@ def do_delete(args):
                     shell=True, capture_output=True)
             err = o.stderr.decode("utf-8")
             if len(err) > 0:
-                print(f"git add error for {err}: '{dsid}'")
+                print(f"git rm error for {dsid}: '{error}'")
                 sys.exit(1)
 
         do_git_commit(repo_path, "")
