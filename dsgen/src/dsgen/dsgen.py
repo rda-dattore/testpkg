@@ -121,12 +121,12 @@ def get_variables(dsid, cursor):
             "keyword where v.vocabulary = 'GCMD' and v.dsid = %s order by "
             "var"), (dsid, ))
     res = cursor.fetchall()
-    vars = []
+    vars = {}
     for e in res:
-        vars.append(e[0].title())
+        vars[e[0].title()] = None
 
     if len(vars) > 0:
-        variables['gcmd'] = vars
+        variables['gcmd'] = [k for k, v in vars.items()]
 
     tables = []
     add_variable_table(dsid, "grib", tables)
