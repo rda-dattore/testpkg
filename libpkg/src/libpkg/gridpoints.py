@@ -71,10 +71,10 @@ def ll_from_lambert_conformal_gridpoint(gridpoint_dict, grid_dict):
     an = hemi * math.sin(tan_lat)
     lat1 = math.radians(grid_dict['left_lat'])
     elon1 = math.radians(grid_dict['left_elon'])
-    grid_dict['dx'] *= 1000.
+    dx = grid_dict['dx'] * 1000.
     # radius in meters to lower left corner of grid
     rmll = (
-            R_EARTH / grid_dict['dx'] * math.pow(math.cos(tan_lat), 1. - an) *
+            R_EARTH / dx * math.pow(math.cos(tan_lat), 1. - an) *
             pow(1. + an, an) *
             pow(math.cos(lat1) / (1. + hemi * math.sin(lat1)), an) / an)
     # find pole point
@@ -97,10 +97,9 @@ def ll_from_lambert_conformal_gridpoint(gridpoint_dict, grid_dict):
         ll_dict['elon'] = grid_dict['orient_elon']
     else:
         aninv = 1. / an
-        z = (
-                math.pow(an / (R_EARTH / grid_dict['dx']), aninv) /
-                (math.pow(math.cos(tan_lat), (1. - an) * aninv) *
-                (1. + an)))
+        z = (math.pow(an / (R_EARTH / dx), aninv) /
+             (math.pow(math.cos(tan_lat), (1. - an) * aninv) *
+             (1. + an)))
         ll_dict['lat'] = (
                 hemi *
                 math.degrees(math.pi / 2. - 2. *
